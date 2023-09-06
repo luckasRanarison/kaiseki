@@ -1,4 +1,4 @@
-use anyhow::Error;
+use anyhow::{Error, Ok};
 use bincode::{config, encode_into_std_write};
 use encoding_rs::EUC_JP;
 use fst::MapBuilder;
@@ -72,6 +72,27 @@ pub fn build_fst() -> Result<(), Error> {
     Ok(())
 }
 
+pub fn build_matrix() -> Result<(), Error> {
+    let buffer = read_mecab_file("matrix.def")?;
+    let mut cost_matrix = vec![vec![0; 1316]; 1316];
+
+    for line in buffer.lines().skip(1) {
+        let values: Vec<_> = line.split(" ").collect();
+        let left_id: usize = values[0].parse().expect("failed to parse left_id");
+        let right_id: usize = values[1].parse().expect("failed to parse right_id");
+        let cost: i32 = values[2].parse().expect("failed to parse cost");
+
+        cost_matrix[left_id][right_id] = cost;
+    }
+
+    let dict_path = Path::new("dict");
+    let config = config::standard();
+    let mut handle = File::create(dict_path.join("matrix.bin"))?;
+    encode_into_std_write(cost_matrix, &mut handle, config)?;
+
+    Ok(())
+}
+
 #[derive(Debug, PartialEq)]
 struct Row<'a> {
     surface_form: &'a str,
@@ -115,9 +136,9 @@ impl<'a> Row<'a> {
 
         Row {
             surface_form: values[0],
-            left_id: values[1].parse::<u16>().expect("failed to parse left_id"),
-            right_id: values[2].parse::<u16>().expect("failed to parse right_id"),
-            cost: values[3].parse::<i16>().expect("failed to parse cost"),
+            left_id: values[1].parse().expect("failed to parse left_id"),
+            right_id: values[2].parse().expect("failed to parse right_id"),
+            cost: values[3].parse().expect("failed to parse cost"),
             pos: values[4],
             pos_sub1: values[5],
             pos_sub2: values[6],
