@@ -1,4 +1,5 @@
 use anyhow::Error;
+use bincode::{config, encode_into_std_write};
 use encoding_rs::EUC_JP;
 use fst::MapBuilder;
 use std::{
@@ -10,6 +11,8 @@ use std::{
 use crate::term::Term;
 
 pub fn build_fst() -> Result<(), Error> {
+    println!("Buiding FST...");
+
     let mut decoded_files = Vec::new();
 
     for file in get_csv_files()? {
@@ -17,10 +20,14 @@ pub fn build_fst() -> Result<(), Error> {
         decoded_files.push(decoded);
     }
 
-    let rows: Vec<_> = decoded_files
-        .iter()
-        .flat_map(|file| file.lines().map(Row::from))
-        .collect();
+    let mut rows = Vec::new();
+
+    for file in &decoded_files {
+        for line in file.lines() {
+            rows.push(Row::from(line));
+        }
+    }
+
     let mut term_map: BTreeMap<String, Vec<Term>> = BTreeMap::new();
 
     for row in rows {
@@ -35,19 +42,32 @@ pub fn build_fst() -> Result<(), Error> {
             .push(term)
     }
 
-    let path = Path::new("dict").join("dict.fst");
-    let handle = File::create(path)?;
+    let dict_path = Path::new("dict");
+    let handle = File::create(dict_path.join("dict.fst"))?;
     let mut map_builder = MapBuilder::new(handle)?;
     let mut id = 0u64;
 
-    for (key, terms) in term_map {
+    for (key, terms) in &term_map {
         let len = terms.len() as u64;
-        let value = id << 5 | len;
+        let value = id << 5 | len; // encode the offset, max len == 20
         map_builder.insert(key, value)?;
         id += len;
     }
 
     map_builder.finish()?;
+    println!("dict.fst has been written to the disk");
+
+    let mut term_values = Vec::new();
+
+    for value in term_map.values() {
+        term_values.extend(value.clone());
+    }
+
+    let config = config::standard();
+    let mut handle = File::create(dict_path.join("dict.bin"))?;
+
+    encode_into_std_write(term_values, &mut handle, config)?;
+    println!("dict.bin has been written to the disk");
 
     Ok(())
 }
