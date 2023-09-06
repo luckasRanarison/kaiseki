@@ -55,7 +55,7 @@ pub fn build_fst() -> Result<(), Error> {
     }
 
     map_builder.finish()?;
-    println!("dict.fst has been written to the disk");
+    println!("dict.fst has been created");
 
     let mut term_values = Vec::new();
 
@@ -67,12 +67,14 @@ pub fn build_fst() -> Result<(), Error> {
     let mut handle = File::create(dict_path.join("dict.bin"))?;
 
     encode_into_std_write(term_values, &mut handle, config)?;
-    println!("dict.bin has been written to the disk");
+    println!("dict.bin has been created");
 
     Ok(())
 }
 
 pub fn build_matrix() -> Result<(), Error> {
+    println!("Buinding cost matrix...");
+
     let buffer = read_mecab_file("matrix.def")?;
     let mut cost_matrix = vec![vec![0; 1316]; 1316];
 
@@ -88,7 +90,9 @@ pub fn build_matrix() -> Result<(), Error> {
     let dict_path = Path::new("dict");
     let config = config::standard();
     let mut handle = File::create(dict_path.join("matrix.bin"))?;
+
     encode_into_std_write(cost_matrix, &mut handle, config)?;
+    print!("matrix.bin has been created");
 
     Ok(())
 }
