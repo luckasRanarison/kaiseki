@@ -1,4 +1,4 @@
-use crate::term::Term;
+use crate::term::{Term, TermId};
 use anyhow::Error;
 use bincode::{config, decode_from_slice};
 use fst::{raw::Output, Map};
@@ -20,7 +20,7 @@ impl FstSearcher {
         Ok(Self { map: fst, terms })
     }
 
-    pub fn get_terms(&self, input: &str) -> Vec<(usize, Term)> {
+    pub fn get_terms(&self, input: &str) -> Vec<(usize, TermId, Term)> {
         let fst = self.map.as_fst();
         let mut node = fst.root();
         let mut term_id = Vec::new();
@@ -49,8 +49,8 @@ impl FstSearcher {
             let id = id.wrapping_shr(5) as usize;
             let terms = &self.terms[id..id + offset];
 
-            for term in terms {
-                terms_value.push((len, term.clone()));
+            for (i, term) in terms.iter().enumerate() {
+                terms_value.push((len, id + i, term.clone()));
             }
         }
 
@@ -68,7 +68,10 @@ mod tests {
         let source = "憂";
         let searcher = FstSearcher::default().unwrap();
         let terms = searcher.get_terms(source);
-        let expected = vec![(3, Term::new(11, 5352)), (3, Term::new(1291, 8836))];
+        let expected = vec![
+            (3, 220041, Term::new(11, 5352)),
+            (3, 220042, Term::new(1291, 8836)),
+        ];
 
         assert_eq!(terms, expected);
     }

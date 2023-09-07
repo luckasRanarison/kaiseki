@@ -1,4 +1,4 @@
-use crate::matrix::CostMatrix;
+use crate::{matrix::CostMatrix, term::TermId};
 
 const START_ID: usize = 0;
 const END_ID: usize = 1;
@@ -7,6 +7,7 @@ type NodeId = usize;
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Node {
+    pub term_id: TermId,
     pub start: usize,
     pub end: usize,
     pub context_id: u16,
@@ -16,8 +17,9 @@ pub struct Node {
 }
 
 impl Node {
-    pub fn new(start: usize, end: usize, context_id: u16, cost: i16) -> Self {
+    pub fn new(term_id: usize, start: usize, end: usize, context_id: u16, cost: i16) -> Self {
         Self {
+            term_id,
             start,
             end,
             context_id,
@@ -28,6 +30,7 @@ impl Node {
     }
 }
 
+#[derive(Debug)]
 pub struct Lattice {
     nodes: Vec<Node>,
     starts_at: Vec<Vec<NodeId>>,
@@ -37,7 +40,12 @@ pub struct Lattice {
 impl Lattice {
     pub fn new(len: usize) -> Self {
         let start_node = Node::default();
-        let end_node = Node::new(len, len, 0, i16::MAX);
+        let end_node = Node {
+            start: len,
+            end: len,
+            total_cost: i32::MAX,
+            ..Default::default()
+        };
         let nodes = vec![start_node, end_node];
         let mut starts_at = vec![vec![]; len + 1];
         let mut ends_at = vec![vec![]; len + 1];
@@ -122,12 +130,12 @@ mod tests {
         let mut lattice = Lattice::new(9);
         let cost_matrix = CostMatrix::default().unwrap();
 
-        lattice.add_node(Node::new(0, 3, 5, 6245));
-        lattice.add_node(Node::new(3, 6, 3, 10791));
-        lattice.add_node(Node::new(6, 9, 5, 7595));
-        lattice.add_node(Node::new(6, 9, 6, 9428));
-        lattice.add_node(Node::new(3, 9, 3, 2135));
-        lattice.add_node(Node::new(0, 6, 3, 3003));
+        lattice.add_node(Node::new(1, 0, 3, 5, 6245));
+        lattice.add_node(Node::new(1, 3, 6, 3, 10791));
+        lattice.add_node(Node::new(1, 6, 9, 5, 7595));
+        lattice.add_node(Node::new(1, 6, 9, 6, 9428));
+        lattice.add_node(Node::new(1, 3, 9, 3, 2135));
+        lattice.add_node(Node::new(1, 0, 6, 3, 3003));
 
         let nodes = lattice.find_path(&cost_matrix);
 
