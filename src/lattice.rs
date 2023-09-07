@@ -127,20 +127,24 @@ mod tests {
 
     #[test]
     fn test_find_path() {
-        let mut lattice = Lattice::new(9);
+        let mut lattice = Lattice::new(18);
         let cost_matrix = CostMatrix::default().unwrap();
 
-        lattice.add_node(Node::new(1, 0, 3, 5, 6245));
-        lattice.add_node(Node::new(2, 0, 6, 3, 3003));
-        lattice.add_node(Node::new(3, 3, 6, 3, 10791));
-        lattice.add_node(Node::new(4, 6, 9, 5, 7595));
-        lattice.add_node(Node::new(5, 6, 9, 6, 9428));
-        lattice.add_node(Node::new(6, 3, 9, 3, 2135));
+        lattice.add_node(Node::new(1, 0, 3, 5, 6245)); // 東
+        lattice.add_node(Node::new(2, 0, 6, 3, 3003)); // 東京
+        lattice.add_node(Node::new(3, 3, 6, 3, 10791)); // 京
+        lattice.add_node(Node::new(4, 6, 9, 5, 7595)); // 都
+        lattice.add_node(Node::new(5, 6, 9, 6, 9428)); // 都
+        lattice.add_node(Node::new(6, 9, 12, 1, 4303)); // に
+        lattice.add_node(Node::new(7, 9, 12, 2, 11880)); // に
+        lattice.add_node(Node::new(8, 12, 18, 4, 7048)); // 住む
 
         let nodes = lattice.find_path(&cost_matrix);
 
-        assert_eq!(2, nodes.len());
-        assert_eq!(2, nodes[0].term_id);
-        assert_eq!(5, nodes[1].term_id);
+        assert_eq!(4, nodes.len());
+        assert_eq!(2, nodes[0].term_id); // 東京
+        assert_eq!(4, nodes[1].term_id); // 都
+        assert_eq!(6, nodes[2].term_id); // 都
+        assert_eq!(8, nodes[3].term_id); // 都
     }
 }

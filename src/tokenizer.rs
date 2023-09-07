@@ -72,15 +72,14 @@ impl Tokenizer {
 #[cfg(test)]
 mod tests {
     use super::Tokenizer;
-    use crate::tokenizer::Token;
 
     #[test]
     fn test_tokenizer() {
         let tokenizer = Tokenizer::default().unwrap();
-        let tokens = tokenizer
-            .tokenize("上記の処理は次のスライドを見てもらうとイメージが付きやすいと思います");
-        let expected: Vec<Token> = Vec::new();
+        let tokens = tokenizer.tokenize("東京都に住む");
+        let expected: Vec<&str> = vec!["東京", "都", "に", "住む"];
+        let text: Vec<_> = tokens.iter().map(|token| &token.text).collect();
 
-        assert_eq!(expected, tokens);
+        assert_eq!(expected, text);
     }
 }
