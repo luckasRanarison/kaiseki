@@ -10,13 +10,13 @@ pub struct Node {
     pub start: usize,
     pub end: usize,
     pub context_id: u16,
-    pub cost: u32,
+    pub cost: i16,
     pub total_cost: i32,
     pub prev_node: Option<NodeId>,
 }
 
 impl Node {
-    pub fn new(start: usize, end: usize, context_id: u16, cost: u32) -> Self {
+    pub fn new(start: usize, end: usize, context_id: u16, cost: i16) -> Self {
         Self {
             start,
             end,
@@ -37,7 +37,7 @@ pub struct Lattice {
 impl Lattice {
     pub fn new(len: usize) -> Self {
         let start_node = Node::default();
-        let end_node = Node::new(len, len, 0, u32::MAX);
+        let end_node = Node::new(len, len, 0, i16::MAX);
         let nodes = vec![start_node, end_node];
         let mut starts_at = vec![vec![]; len + 1];
         let mut ends_at = vec![vec![]; len + 1];
@@ -73,7 +73,7 @@ impl Lattice {
                     let prev_cost = prev_node.total_cost;
                     let current_cost = current.cost;
                     let connection_cost = matrix.get(prev_node.context_id, prev_node.context_id);
-                    let total_cost = prev_cost + current_cost as i32 + connection_cost;
+                    let total_cost = prev_cost + current_cost as i32 + connection_cost as i32;
 
                     if total_cost < current.total_cost {
                         let mut node = &mut self.nodes[current_id];
@@ -85,6 +85,10 @@ impl Lattice {
         }
 
         self.build_path()
+    }
+
+    pub fn has_node_ending_at(&self, index: usize) -> bool {
+        !self.ends_at[index].is_empty()
     }
 
     fn build_path(&self) -> Vec<Node> {

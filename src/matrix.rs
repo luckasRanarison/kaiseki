@@ -4,7 +4,7 @@ use bincode::{config, decode_from_slice};
 const COST_MATRIX: &'static [u8] = include_bytes!("../dict/matrix.bin");
 
 pub struct CostMatrix {
-    matrix: Vec<Vec<i32>>,
+    matrix: Vec<Vec<i16>>,
 }
 
 impl CostMatrix {
@@ -15,7 +15,7 @@ impl CostMatrix {
         Ok(Self { matrix })
     }
 
-    pub fn get(&self, left_id: u16, right_id: u16) -> i32 {
+    pub fn get(&self, left_id: u16, right_id: u16) -> i16 {
         self.matrix[left_id as usize][right_id as usize]
     }
 }
