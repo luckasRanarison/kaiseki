@@ -67,23 +67,8 @@ mod tests {
     fn test_prefix_search() {
         let source = "憂";
         let searcher = FstSearcher::default().unwrap();
-        let terms = searcher.get_terms(&source[..]);
-        let expected = vec![
-            (
-                3,
-                Term {
-                    context_id: 11,
-                    cost: 5352,
-                },
-            ),
-            (
-                3,
-                Term {
-                    context_id: 1291,
-                    cost: 8836,
-                },
-            ),
-        ];
+        let terms = searcher.get_terms(source);
+        let expected = vec![(3, Term::new(11, 5352)), (3, Term::new(1291, 8836))];
 
         assert_eq!(terms, expected);
     }

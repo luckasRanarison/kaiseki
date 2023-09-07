@@ -31,10 +31,7 @@ pub fn build_fst() -> Result<(), Error> {
     let mut term_map: BTreeMap<String, Vec<Term>> = BTreeMap::new();
 
     for row in rows {
-        let term = Term {
-            context_id: row.left_id, // left_id == right_id
-            cost: row.cost,
-        };
+        let term = Term::new(row.left_id, row.cost); // left_id == right_id
 
         term_map
             .entry(row.surface_form.to_owned())
@@ -55,6 +52,7 @@ pub fn build_fst() -> Result<(), Error> {
     }
 
     map_builder.finish()?;
+
     println!("dict.fst has been created");
 
     let mut term_values = Vec::new();
@@ -67,6 +65,7 @@ pub fn build_fst() -> Result<(), Error> {
     let mut handle = File::create(dict_path.join("dict.bin"))?;
 
     encode_into_std_write(term_values, &mut handle, config)?;
+
     println!("dict.bin has been created");
 
     Ok(())
@@ -92,6 +91,7 @@ pub fn build_matrix() -> Result<(), Error> {
     let mut handle = File::create(dict_path.join("matrix.bin"))?;
 
     encode_into_std_write(cost_matrix, &mut handle, config)?;
+
     print!("matrix.bin has been created");
 
     Ok(())
