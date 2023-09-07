@@ -77,7 +77,7 @@ mod tests {
     fn test_tokenizer() {
         let tokenizer = Tokenizer::default().unwrap();
         let tokens = tokenizer.tokenize("東京都に住む");
-        let expected: Vec<&str> = vec!["東京", "都", "に", "住む"];
+        let expected = vec!["東京", "都", "に", "住む"];
         let text: Vec<_> = tokens.iter().map(|token| &token.text).collect();
 
         assert_eq!(expected, text);

@@ -144,7 +144,7 @@ mod tests {
         assert_eq!(4, nodes.len());
         assert_eq!(2, nodes[0].term_id); // 東京
         assert_eq!(4, nodes[1].term_id); // 都
-        assert_eq!(6, nodes[2].term_id); // 都
-        assert_eq!(8, nodes[3].term_id); // 都
+        assert_eq!(6, nodes[2].term_id); // に
+        assert_eq!(8, nodes[3].term_id); // 住む
     }
 }
