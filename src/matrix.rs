@@ -15,8 +15,8 @@ impl CostMatrix {
         Ok(Self { matrix })
     }
 
-    pub fn get(&self, left_id: u16, right_id: u16) -> i16 {
-        self.matrix[left_id as usize][right_id as usize]
+    pub fn get(&self, right_id: u16, left_id: u16) -> i16 {
+        self.matrix[right_id as usize][left_id as usize]
     }
 }
 

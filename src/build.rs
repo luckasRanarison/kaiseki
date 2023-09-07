@@ -85,15 +85,20 @@ pub fn build_matrix() -> Result<(), Error> {
     println!("Building cost matrix...");
 
     let buffer = read_mecab_file("matrix.def")?;
-    let mut cost_matrix = vec![vec![0; 1316]; 1316];
+    let mut lines = buffer.lines();
+    let header = lines.next().unwrap();
+    let header: Vec<_> = header.split_whitespace().collect();
+    let row: usize = header[0].parse()?;
+    let col: usize = header[1].parse()?;
+    let mut cost_matrix = vec![vec![0; row]; col];
 
-    for line in buffer.lines().skip(1) {
-        let values: Vec<_> = line.split(" ").collect();
-        let left_id: usize = values[0].parse().expect("failed to parse left_id");
-        let right_id: usize = values[1].parse().expect("failed to parse right_id");
-        let cost: i32 = values[2].parse().expect("failed to parse cost");
+    for line in lines {
+        let values: Vec<_> = line.split_whitespace().collect();
+        let right_id: usize = values[0].parse()?;
+        let left_id: usize = values[1].parse()?;
+        let cost: i16 = values[2].parse()?;
 
-        cost_matrix[left_id][right_id] = cost;
+        cost_matrix[right_id][left_id] = cost;
     }
 
     let dict_path = Path::new("dict");

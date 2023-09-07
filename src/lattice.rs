@@ -80,7 +80,7 @@ impl Lattice {
                     let current = self.get_node(current_id);
                     let prev_cost = prev_node.total_cost;
                     let current_cost = current.cost;
-                    let connection_cost = matrix.get(prev_node.context_id, prev_node.context_id);
+                    let connection_cost = matrix.get(prev_node.context_id, current.context_id);
                     let total_cost = prev_cost + current_cost as i32 + connection_cost as i32;
 
                     if total_cost < current.total_cost {
@@ -131,14 +131,16 @@ mod tests {
         let cost_matrix = CostMatrix::default().unwrap();
 
         lattice.add_node(Node::new(1, 0, 3, 5, 6245));
-        lattice.add_node(Node::new(1, 3, 6, 3, 10791));
-        lattice.add_node(Node::new(1, 6, 9, 5, 7595));
-        lattice.add_node(Node::new(1, 6, 9, 6, 9428));
-        lattice.add_node(Node::new(1, 3, 9, 3, 2135));
-        lattice.add_node(Node::new(1, 0, 6, 3, 3003));
+        lattice.add_node(Node::new(2, 0, 6, 3, 3003));
+        lattice.add_node(Node::new(3, 3, 6, 3, 10791));
+        lattice.add_node(Node::new(4, 6, 9, 5, 7595));
+        lattice.add_node(Node::new(5, 6, 9, 6, 9428));
+        lattice.add_node(Node::new(6, 3, 9, 3, 2135));
 
         let nodes = lattice.find_path(&cost_matrix);
 
         assert_eq!(2, nodes.len());
+        assert_eq!(2, nodes[0].term_id);
+        assert_eq!(5, nodes[1].term_id);
     }
 }
