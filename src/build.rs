@@ -39,6 +39,14 @@ pub fn get_term_map() -> Result<TermMap, Error> {
     Ok(term_map)
 }
 
+pub fn read_mecab_file(filename: &str) -> Result<String, Error> {
+    let path = Path::new("dict").join(filename);
+    let bytes = fs::read(path)?;
+    let (buffer, _, _) = EUC_JP.decode(&bytes);
+
+    Ok(buffer.to_string())
+}
+
 pub fn build_fst(term_map: &TermMap) -> Result<(), Error> {
     println!("Building FST...");
 
@@ -112,12 +120,58 @@ pub fn build_matrix() -> Result<(), Error> {
     Ok(())
 }
 
-pub fn read_mecab_file(filename: &str) -> Result<String, Error> {
-    let path = Path::new("dict").join(filename);
-    let bytes = fs::read(path)?;
-    let (buffer, _, _) = EUC_JP.decode(&bytes);
+pub fn build_char_def() -> Result<(), Error> {
+    let buffer = read_mecab_file("char.def")?;
+    let mut char_map = Vec::new();
 
-    Ok(buffer.to_string())
+    for line in buffer.lines() {
+        if line.starts_with("#") || line.is_empty() {
+            continue;
+        }
+
+        let fields: Vec<_> = line.split_whitespace().collect();
+
+        if line.starts_with("0x") {
+            let bounds: Vec<_> = fields[0].split("..").collect();
+
+            let (lower, upper) = match bounds.len() {
+                1 => {
+                    let bound = parse_hex(bounds[0])?;
+                    (bound, bound)
+                }
+                _ => {
+                    let lower = parse_hex(bounds[0])?;
+                    let upper = parse_hex(bounds[1])?;
+                    (lower, upper)
+                }
+            };
+
+            let mut categories = Vec::new();
+
+            for &category in &fields[1..] {
+                if category == "#" {
+                    break;
+                }
+
+                categories.push(category);
+            }
+
+            char_map.push((lower, upper, categories));
+        } else {
+            //
+        }
+    }
+
+    panic!("{:?}", char_map);
+
+    Ok(())
+}
+
+fn parse_hex(hex: &str) -> Result<u32, Error> {
+    let radix = hex.trim_start_matches("0x");
+    let parsed = u32::from_str_radix(radix, 16)?;
+
+    Ok(parsed)
 }
 
 fn get_csv_files() -> Result<Vec<String>, Error> {
