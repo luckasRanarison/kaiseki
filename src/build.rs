@@ -9,25 +9,23 @@ use std::{
     path::Path,
 };
 
-pub fn build_fst() -> Result<(), Error> {
-    println!("Buiding FST...");
+pub type TermMap = BTreeMap<String, Vec<Term>>;
 
+pub fn get_term_map() -> Result<TermMap, Error> {
     let mut decoded_files = Vec::new();
+    let mut rows = Vec::new();
+    let mut term_map = BTreeMap::new();
 
     for file in get_csv_files()? {
         let decoded = read_mecab_file(&file)?;
         decoded_files.push(decoded);
     }
 
-    let mut rows = Vec::new();
-
     for file in &decoded_files {
         for line in file.lines() {
             rows.push(Row::from_line(line));
         }
     }
-
-    let mut term_map: BTreeMap<String, Vec<Term>> = BTreeMap::new();
 
     for row in rows {
         let term = Term::new(row.left_id, row.cost); // left_id == right_id
@@ -38,12 +36,18 @@ pub fn build_fst() -> Result<(), Error> {
             .push(term)
     }
 
-    let dict_path = Path::new("dict");
-    let handle = File::create(dict_path.join("dict.fst"))?;
+    Ok(term_map)
+}
+
+pub fn build_fst(term_map: &TermMap) -> Result<(), Error> {
+    println!("Building FST...");
+
+    let path = Path::new("dict").join("term.fst");
+    let handle = File::create(path)?;
     let mut map_builder = MapBuilder::new(handle)?;
     let mut id = 0u64;
 
-    for (key, terms) in &term_map {
+    for (key, terms) in term_map {
         let len = terms.len() as u64;
         let value = id << 5 | len; // encode the offset, max len == 20
         map_builder.insert(key, value)?;
@@ -52,7 +56,13 @@ pub fn build_fst() -> Result<(), Error> {
 
     map_builder.finish()?;
 
-    println!("dict.fst has been created");
+    println!("term.fst has been created");
+
+    Ok(())
+}
+
+pub fn build_term(term_map: &TermMap) -> Result<(), Error> {
+    println!("Building term values...");
 
     let mut term_values = Vec::new();
 
@@ -61,17 +71,18 @@ pub fn build_fst() -> Result<(), Error> {
     }
 
     let config = config::standard();
-    let mut handle = File::create(dict_path.join("dict.bin"))?;
+    let path = Path::new("dict").join("term.bin");
+    let mut handle = File::create(path)?;
 
     encode_into_std_write(term_values, &mut handle, config)?;
 
-    println!("dict.bin has been created");
+    println!("term.bin has been created");
 
     Ok(())
 }
 
 pub fn build_matrix() -> Result<(), Error> {
-    println!("Buinding cost matrix...");
+    println!("Building cost matrix...");
 
     let buffer = read_mecab_file("matrix.def")?;
     let mut cost_matrix = vec![vec![0; 1316]; 1316];

@@ -3,8 +3,8 @@ use anyhow::Error;
 use bincode::{config, decode_from_slice};
 use fst::{raw::Output, Map};
 
-const FST: &'static [u8] = include_bytes!("../dict/dict.fst");
-const TERMS: &'static [u8] = include_bytes!("../dict/dict.bin");
+const FST: &'static [u8] = include_bytes!("../dict/term.fst");
+const TERMS: &'static [u8] = include_bytes!("../dict/term.bin");
 
 pub struct FstSearcher {
     map: Map<&'static [u8]>,
