@@ -1,14 +1,7 @@
-use crate::{
-    char::{CharCategory, CharTable},
-    error::Error,
-    row::Row,
-    term::Term,
-    unk::UnknownDictionary,
-    utils::BINCODE_CONFIG,
-};
 use bincode::encode_into_std_write;
 use encoding_rs::EUC_JP;
 use fst::MapBuilder;
+use kaiseki::{build::*, error::Error};
 use std::{
     collections::{BTreeMap, HashMap},
     fs::{self, File},
@@ -272,4 +265,18 @@ fn get_csv_files() -> Result<Vec<String>, Error> {
     }
 
     Ok(files)
+}
+
+fn main() -> Result<(), Error> {
+    let term_map = get_term_map()?;
+
+    build_char_def()?;
+    build_unk()?;
+    build_matrix()?;
+    build_fst(&term_map)?;
+    build_term(&term_map)?;
+
+    println!("Build complete!");
+
+    Ok(())
 }

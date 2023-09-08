@@ -1,13 +1,13 @@
 use crate::{
     char::CharTable,
     dict::EntryDictionary,
+    error::Error,
     fst::FstSearcher,
     lattice::{Lattice, Node},
     matrix::CostMatrix,
     term::ExtratedTerm,
     unk::UnknownDictionary,
 };
-use anyhow::Error;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token {
@@ -31,7 +31,7 @@ pub struct Tokenizer {
 }
 
 impl Tokenizer {
-    pub fn default() -> Result<Self, Error> {
+    pub fn new() -> Result<Self, Error> {
         Ok(Self {
             fst: FstSearcher::load()?,
             dict: EntryDictionary::load()?,
@@ -136,13 +136,17 @@ impl Tokenizer {
     }
 }
 
+pub fn tokenize(input: &str) -> Result<Vec<Token>, Error> {
+    Ok(Tokenizer::new()?.tokenize(input))
+}
+
 #[cfg(test)]
 mod tests {
     use super::Tokenizer;
 
     #[test]
     fn test_tokenizer() {
-        let tokenizer = Tokenizer::default().unwrap();
+        let tokenizer = Tokenizer::new().unwrap();
         let tokens = tokenizer.tokenize("東京都に住む");
         let expected = vec!["東京", "都", "に", "住む"];
         let text: Vec<_> = tokens.iter().map(|token| &token.text).collect();
@@ -152,7 +156,7 @@ mod tests {
 
     #[test]
     fn test_tokenizer_unkown() {
-        let tokenizer = Tokenizer::default().unwrap();
+        let tokenizer = Tokenizer::new().unwrap();
         let tokens = tokenizer.tokenize("1234個");
         let expected = vec!["1234", "個"];
         let text: Vec<_> = tokens.iter().map(|token| &token.text).collect();
