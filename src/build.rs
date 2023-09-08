@@ -1,11 +1,11 @@
 use crate::{
     char::{CharCategory, CharTable},
+    error::Error,
     row::Row,
     term::Term,
     unk::UnknownDictionary,
     utils::BINCODE_CONFIG,
 };
-use anyhow::{Error, Ok};
 use bincode::encode_into_std_write;
 use encoding_rs::EUC_JP;
 use fst::MapBuilder;
@@ -88,6 +88,11 @@ pub fn build_term(term_map: &TermMap) -> Result<(), Error> {
 
     println!("term.bin has been created");
 
+    Ok(())
+}
+
+pub fn build_feature() -> Result<(), Error> {
+    // let mut features = Vec::new();
     Ok(())
 }
 

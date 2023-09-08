@@ -1,5 +1,4 @@
-use crate::term::TermId;
-use anyhow::Error;
+use crate::{error::Error, term::TermId};
 use fst::{raw::Output, Map};
 
 const FST: &'static [u8] = include_bytes!("../dict/term.fst");

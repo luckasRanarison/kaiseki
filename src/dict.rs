@@ -1,8 +1,8 @@
 use crate::{
+    error::Error,
     term::{Term, TermId},
     utils::BINCODE_CONFIG,
 };
-use anyhow::Error;
 use bincode::decode_from_slice;
 
 const TERMS: &'static [u8] = include_bytes!("../dict/term.bin");

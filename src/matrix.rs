@@ -1,5 +1,4 @@
-use crate::utils::BINCODE_CONFIG;
-use anyhow::Error;
+use crate::{error::Error, utils::BINCODE_CONFIG};
 use bincode::decode_from_slice;
 
 const COST_MATRIX: &'static [u8] = include_bytes!("../dict/matrix.bin");

@@ -1,5 +1,4 @@
-use crate::utils::BINCODE_CONFIG;
-use anyhow::Error;
+use crate::{error::Error, utils::BINCODE_CONFIG};
 use bincode::{decode_from_slice, Decode, Encode};
 
 const CHAR_DEF: &'static [u8] = include_bytes!("../dict/char.bin");
