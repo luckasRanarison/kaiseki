@@ -1,5 +1,5 @@
 use crate::{
-    char::{CharCategory, CharLookup},
+    char::{CharCategory, CharTable},
     row::Row,
     term::Term,
 };
@@ -129,7 +129,7 @@ pub fn build_char_def() -> Result<(), Error> {
 
     let buffer = read_mecab_file("char.def")?;
     let mut boundaries = Vec::new();
-    let mut categories = HashMap::new();
+    let mut category_def_map = HashMap::new();
 
     for line in buffer.lines() {
         if line.starts_with("#") || line.is_empty() {
@@ -141,12 +141,27 @@ pub fn build_char_def() -> Result<(), Error> {
             boundaries.push(values);
         } else {
             let (name, value) = parse_category(line)?;
-            categories.insert(name, value);
+            category_def_map.insert(name, value);
         }
     }
 
-    let char_lookup = CharLookup::new(boundaries, categories);
+    let mut char_category_map = vec![vec![]; 0xFFFF + 1];
 
+    for (lower, upper, keys) in boundaries {
+        let mut categories = Vec::new();
+
+        for key in keys {
+            if let Some(category) = category_def_map.get(key) {
+                categories.push(category.clone());
+            }
+        }
+
+        for index in lower..=upper {
+            char_category_map[index as usize] = categories.clone();
+        }
+    }
+
+    let char_lookup = CharTable::new(char_category_map);
     let path = Path::new("dict").join("char.bin");
     let config = config::standard();
     let mut handle = File::create(path)?;
@@ -158,7 +173,7 @@ pub fn build_char_def() -> Result<(), Error> {
     Ok(())
 }
 
-fn parse_char_map(line: &str) -> Result<(u32, u32, Vec<String>), Error> {
+fn parse_char_map(line: &str) -> Result<(u32, u32, Vec<&str>), Error> {
     let fields: Vec<_> = line.split_whitespace().collect();
     let bounds: Vec<_> = fields[0].split("..").collect();
 
@@ -181,7 +196,7 @@ fn parse_char_map(line: &str) -> Result<(u32, u32, Vec<String>), Error> {
             break;
         }
 
-        categories.push(category.to_owned());
+        categories.push(category);
     }
 
     Ok((upper, lower, categories))

@@ -1,24 +1,16 @@
 use anyhow::Error;
 use bincode::{config, decode_from_slice, Decode, Encode};
-use std::collections::HashMap;
 
 const CHAR_DEF: &'static [u8] = include_bytes!("../dict/char.bin");
 
 #[derive(Encode, Decode)]
-pub struct CharLookup {
-    boundaries: Vec<(u32, u32, Vec<String>)>,
-    categories: HashMap<String, CharCategory>,
+pub struct CharTable {
+    map: Vec<Vec<CharCategory>>,
 }
 
-impl CharLookup {
-    pub fn new(
-        boundaries: Vec<(u32, u32, Vec<String>)>,
-        categories: HashMap<String, CharCategory>,
-    ) -> Self {
-        Self {
-            boundaries,
-            categories,
-        }
+impl CharTable {
+    pub fn new(map: Vec<Vec<CharCategory>>) -> Self {
+        Self { map }
     }
 
     pub fn load() -> Result<Self, Error> {
@@ -28,25 +20,17 @@ impl CharLookup {
         Ok(char_def)
     }
 
-    pub fn lookup(&self, character: char) -> Vec<&CharCategory> {
-        let decimal = character as u32;
-        let mut categories = Vec::new();
+    pub fn lookup(&self, character: char) -> &Vec<CharCategory> {
+        let index = character as usize;
 
-        for (lower, upper, keys) in &self.boundaries {
-            if decimal >= *lower && decimal <= *upper {
-                for key in keys {
-                    if let Some(category) = self.categories.get(key) {
-                        categories.push(category);
-                    }
-                }
-            }
+        match index {
+            0..=0xFFFF => &self.map[index],
+            _ => &self.map[0xFFFF],
         }
-
-        categories
     }
 }
 
-#[derive(Debug, PartialEq, Encode, Decode)]
+#[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
 pub struct CharCategory {
     pub name: String,
     pub invoke: bool,
@@ -71,12 +55,13 @@ mod tests {
 
     #[test]
     fn test_lookup() {
-        let lookup_table = CharLookup::load().unwrap();
+        let lookup_table = CharTable::load().unwrap();
         let categories = lookup_table.lookup('一');
-        let cat1 = CharCategory::new("KANJINUMERIC".to_owned(), true, true, 0);
-        let cat2 = CharCategory::new("KANJI".to_owned(), false, false, 2);
-        let expected: Vec<&CharCategory> = vec![&cat1, &cat2];
+        let expected = vec![
+            CharCategory::new("KANJINUMERIC".to_owned(), true, true, 0),
+            CharCategory::new("KANJI".to_owned(), false, false, 2),
+        ];
 
-        assert_eq!(expected, categories);
+        assert_eq!(&expected, categories);
     }
 }
