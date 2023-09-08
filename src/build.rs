@@ -15,7 +15,7 @@ use std::{
     path::Path,
 };
 
-pub type TermMap = BTreeMap<String, Vec<Term>>;
+type TermMap = BTreeMap<String, Vec<Term>>;
 
 pub fn get_term_map() -> Result<TermMap, Error> {
     let mut decoded_files = Vec::new();
@@ -23,8 +23,7 @@ pub fn get_term_map() -> Result<TermMap, Error> {
     let mut term_map = BTreeMap::new();
 
     for file in get_csv_files()? {
-        let decoded = read_mecab_file(&file)?;
-        decoded_files.push(decoded);
+        decoded_files.push(read_mecab_file(&file)?);
     }
 
     for file in &decoded_files {
@@ -34,12 +33,10 @@ pub fn get_term_map() -> Result<TermMap, Error> {
     }
 
     for row in rows {
-        let term = Term::from(&row); // left_id == right_id
-
         term_map
             .entry(row.surface_form.to_owned())
             .or_insert_with(Vec::new)
-            .push(term)
+            .push(Term::from(&row))
     }
 
     Ok(term_map)
@@ -63,7 +60,7 @@ pub fn build_fst(term_map: &TermMap) -> Result<(), Error> {
 
     for (key, terms) in term_map {
         let len = terms.len() as u64;
-        let value = id << 5 | len; // encode the offset, max len == 20
+        let value = id << 5 | len; // encode the offset, assert!(len < 32)
         map_builder.insert(key, value)?;
         id += len;
     }

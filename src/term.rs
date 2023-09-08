@@ -12,7 +12,7 @@ pub struct Term {
 impl From<&Row<'_>> for Term {
     fn from(value: &Row) -> Self {
         Self {
-            context_id: value.left_id,
+            context_id: value.left_id, // assert_eq!(value.left_id, value.right_id);
             cost: value.cost,
         }
     }
