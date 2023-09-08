@@ -2,6 +2,7 @@ use crate::{
     char::{CharCategory, CharTable},
     row::Row,
     term::Term,
+    unk::UnkDictionary,
 };
 use anyhow::{Error, Ok};
 use bincode::{config, encode_into_std_write};
@@ -27,12 +28,12 @@ pub fn get_term_map() -> Result<TermMap, Error> {
 
     for file in &decoded_files {
         for line in file.lines() {
-            rows.push(Row::from_line(line));
+            rows.push(Row::try_from(line)?);
         }
     }
 
     for row in rows {
-        let term = Term::new(row.left_id, row.cost); // left_id == right_id
+        let term = Term::from(&row); // left_id == right_id
 
         term_map
             .entry(row.surface_form.to_owned())
@@ -119,7 +120,7 @@ pub fn build_matrix() -> Result<(), Error> {
 
     encode_into_std_write(cost_matrix, &mut handle, config)?;
 
-    print!("matrix.bin has been created");
+    println!("matrix.bin has been created");
 
     Ok(())
 }
@@ -161,14 +162,42 @@ pub fn build_char_def() -> Result<(), Error> {
         }
     }
 
-    let char_lookup = CharTable::new(char_category_map);
+    let char_table = CharTable::new(char_category_map);
     let path = Path::new("dict").join("char.bin");
     let config = config::standard();
     let mut handle = File::create(path)?;
 
-    encode_into_std_write(char_lookup, &mut handle, config)?;
+    encode_into_std_write(char_table, &mut handle, config)?;
 
     println!("char.bin has been created");
+
+    Ok(())
+}
+
+pub fn build_unk() -> Result<(), Error> {
+    println!("Building unknown dictionary...");
+
+    let buffer = read_mecab_file("unk.def")?;
+    let mut unk_term_map = HashMap::new();
+
+    for line in buffer.lines() {
+        let row = Row::try_from(line)?;
+        let term = Term::from(&row);
+
+        unk_term_map
+            .entry(row.surface_form.to_string())
+            .or_insert_with(Vec::new)
+            .push(term);
+    }
+
+    let unk_dict = UnkDictionary::new(unk_term_map);
+    let path = Path::new("dict").join("unk.bin");
+    let config = config::standard();
+    let mut handle = File::create(path)?;
+
+    encode_into_std_write(unk_dict, &mut handle, config)?;
+
+    println!("unk.bin has been created");
 
     Ok(())
 }

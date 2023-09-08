@@ -6,3 +6,4 @@ pub mod matrix;
 pub mod row;
 pub mod term;
 pub mod tokenizer;
+pub mod unk;
