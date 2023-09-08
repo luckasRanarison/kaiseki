@@ -9,11 +9,15 @@ use std::{
 };
 
 type TermMap = BTreeMap<String, Vec<Term>>;
+type FeatMap = HashMap<String, Vec<Feature>>;
 
-pub fn get_term_map() -> Result<TermMap, Error> {
+pub fn get_entry_map() -> Result<(TermMap, FeatMap), Error> {
+    println!("Decoding mecab IPA dictionary files...");
+
     let mut decoded_files = Vec::new();
     let mut rows = Vec::new();
     let mut term_map = BTreeMap::new();
+    let mut feat_map = HashMap::new();
 
     for file in get_csv_files()? {
         decoded_files.push(read_mecab_file(&file)?);
@@ -29,10 +33,15 @@ pub fn get_term_map() -> Result<TermMap, Error> {
         term_map
             .entry(row.surface_form.to_owned())
             .or_insert_with(Vec::new)
-            .push(Term::from(&row))
+            .push(Term::from(&row));
+
+        feat_map
+            .entry(row.surface_form.to_owned())
+            .or_insert_with(Vec::new)
+            .push(Feature::from(&row));
     }
 
-    Ok(term_map)
+    Ok((term_map, feat_map))
 }
 
 pub fn read_mecab_file(filename: &str) -> Result<String, Error> {
@@ -84,8 +93,22 @@ pub fn build_term(term_map: &TermMap) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn build_feature() -> Result<(), Error> {
-    // let mut features = Vec::new();
+pub fn build_feature(feat_map: FeatMap) -> Result<(), Error> {
+    println!("Building feature...");
+
+    let mut feat_values = Vec::new();
+
+    for value in feat_map.values() {
+        feat_values.extend(value.clone());
+    }
+
+    let path = Path::new("dict").join("feature.bin");
+    let mut handle = File::create(path)?;
+
+    encode_into_std_write(feat_values, &mut handle, *BINCODE_CONFIG)?;
+
+    println!("feature.bin has been created");
+
     Ok(())
 }
 
@@ -268,13 +291,14 @@ fn get_csv_files() -> Result<Vec<String>, Error> {
 }
 
 fn main() -> Result<(), Error> {
-    let term_map = get_term_map()?;
+    let (term_map, feat_map) = get_entry_map()?;
 
     build_char_def()?;
     build_unk()?;
     build_matrix()?;
     build_fst(&term_map)?;
     build_term(&term_map)?;
+    build_feature(feat_map)?;
 
     println!("Build complete!");
 
