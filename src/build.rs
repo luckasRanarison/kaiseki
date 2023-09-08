@@ -1,10 +1,14 @@
-use crate::{row::Row, term::Term};
+use crate::{
+    char::{CharCategory, CharLookup},
+    row::Row,
+    term::Term,
+};
 use anyhow::{Error, Ok};
 use bincode::{config, encode_into_std_write};
 use encoding_rs::EUC_JP;
 use fst::MapBuilder;
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, HashMap},
     fs::{self, File},
     path::Path,
 };
@@ -109,9 +113,9 @@ pub fn build_matrix() -> Result<(), Error> {
         cost_matrix[right_id][left_id] = cost;
     }
 
-    let dict_path = Path::new("dict");
+    let path = Path::new("dict").join("matrix.bin");
     let config = config::standard();
-    let mut handle = File::create(dict_path.join("matrix.bin"))?;
+    let mut handle = File::create(path)?;
 
     encode_into_std_write(cost_matrix, &mut handle, config)?;
 
@@ -121,50 +125,66 @@ pub fn build_matrix() -> Result<(), Error> {
 }
 
 pub fn build_char_def() -> Result<(), Error> {
+    println!("Buiding char definition..");
+
     let buffer = read_mecab_file("char.def")?;
-    let mut char_map = Vec::new();
+    let mut boundaries = Vec::new();
+    let mut categories = HashMap::new();
 
     for line in buffer.lines() {
         if line.starts_with("#") || line.is_empty() {
             continue;
         }
 
-        let fields: Vec<_> = line.split_whitespace().collect();
-
         if line.starts_with("0x") {
-            let bounds: Vec<_> = fields[0].split("..").collect();
-
-            let (lower, upper) = match bounds.len() {
-                1 => {
-                    let bound = parse_hex(bounds[0])?;
-                    (bound, bound)
-                }
-                _ => {
-                    let lower = parse_hex(bounds[0])?;
-                    let upper = parse_hex(bounds[1])?;
-                    (lower, upper)
-                }
-            };
-
-            let mut categories = Vec::new();
-
-            for &category in &fields[1..] {
-                if category == "#" {
-                    break;
-                }
-
-                categories.push(category);
-            }
-
-            char_map.push((lower, upper, categories));
+            let values = parse_char_map(line)?;
+            boundaries.push(values);
         } else {
-            //
+            let (name, value) = parse_category(line)?;
+            categories.insert(name, value);
         }
     }
 
-    panic!("{:?}", char_map);
+    let char_lookup = CharLookup::new(boundaries, categories);
+
+    let path = Path::new("dict").join("char.bin");
+    let config = config::standard();
+    let mut handle = File::create(path)?;
+
+    encode_into_std_write(char_lookup, &mut handle, config)?;
+
+    println!("char.bin has been created");
 
     Ok(())
+}
+
+fn parse_char_map(line: &str) -> Result<(u32, u32, Vec<String>), Error> {
+    let fields: Vec<_> = line.split_whitespace().collect();
+    let bounds: Vec<_> = fields[0].split("..").collect();
+
+    let (lower, upper) = match bounds.len() {
+        1 => {
+            let bound = parse_hex(bounds[0])?;
+            (bound, bound)
+        }
+        _ => {
+            let lower = parse_hex(bounds[0])?;
+            let upper = parse_hex(bounds[1])?;
+            (lower, upper)
+        }
+    };
+
+    let mut categories = Vec::new();
+
+    for &category in &fields[1..] {
+        if category == "#" {
+            break;
+        }
+
+        categories.push(category.to_owned());
+    }
+
+    Ok((upper, lower, categories))
 }
 
 fn parse_hex(hex: &str) -> Result<u32, Error> {
@@ -172,6 +192,25 @@ fn parse_hex(hex: &str) -> Result<u32, Error> {
     let parsed = u32::from_str_radix(radix, 16)?;
 
     Ok(parsed)
+}
+
+fn parse_category(line: &str) -> Result<(String, CharCategory), Error> {
+    let fields: Vec<_> = line.split_whitespace().collect();
+    let name = fields[0].to_owned();
+    let invoke: u8 = fields[1].parse()?;
+    let invoke = match invoke {
+        1 => true,
+        _ => false,
+    };
+    let group: u8 = fields[2].parse()?;
+    let group = match group {
+        1 => true,
+        _ => false,
+    };
+    let length = fields[3].parse()?;
+    let category = CharCategory::new(name.clone(), invoke, group, length);
+
+    Ok((name, category))
 }
 
 fn get_csv_files() -> Result<Vec<String>, Error> {
