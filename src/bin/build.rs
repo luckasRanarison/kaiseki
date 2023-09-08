@@ -1,7 +1,7 @@
 use bincode::encode_into_std_write;
 use encoding_rs::EUC_JP;
 use fst::MapBuilder;
-use kaiseki::{build::*, error::Error};
+use kaiseki::{build::*, error::Error, Feature};
 use std::{
     collections::{BTreeMap, HashMap},
     fs::{self, File},

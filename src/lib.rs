@@ -14,13 +14,13 @@ mod utils;
 
 pub mod error;
 pub use conjugation::*;
+pub use feature::*;
 pub use pos::*;
 pub use tokenizer::*;
 
 pub mod build {
     pub use crate::char::*;
     pub use crate::dict::EntryDictionary;
-    pub use crate::feature::Feature;
     pub use crate::row::Row;
     pub use crate::term::Term;
     pub use crate::unk::UnknownDictionary;

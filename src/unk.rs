@@ -1,6 +1,6 @@
 use crate::{
-    build::Feature,
     error::Error,
+    feature::Feature,
     term::{Term, TermId},
     utils::BINCODE_CONFIG,
 };
