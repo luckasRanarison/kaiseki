@@ -8,7 +8,7 @@ pub struct CostMatrix {
 }
 
 impl CostMatrix {
-    pub fn default() -> Result<Self, Error> {
+    pub fn load() -> Result<Self, Error> {
         let config = config::standard();
         let (matrix, _) = decode_from_slice(&COST_MATRIX, config)?;
 
@@ -26,7 +26,7 @@ mod tests {
 
     #[test]
     fn test_cost_matrix() {
-        let cost_matrix = CostMatrix::default().unwrap();
+        let cost_matrix = CostMatrix::load().unwrap();
 
         assert_eq!(cost_matrix.get(0, 0), -434);
     }

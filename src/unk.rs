@@ -26,7 +26,7 @@ impl UnkDictionary {
         Ok(unk_dict)
     }
 
-    pub fn get_term(&self, key: &str) -> Option<&Vec<Term>> {
+    pub fn get_terms(&self, key: &str) -> Option<&Vec<Term>> {
         self.terms.get(key)
     }
 }
@@ -38,9 +38,10 @@ mod tests {
     #[test]
     fn test_get_term() {
         let unk_dict = UnkDictionary::load().unwrap();
-        let terms = vec![Term::new(5, 4769)];
-        let expected = Some(&terms);
+        let terms = unk_dict.get_terms("DEFAULT").unwrap();
+        let term = &terms[0];
 
-        assert_eq!(expected, unk_dict.get_term("DEFAULT"));
+        assert_eq!(5, term.context_id);
+        assert_eq!(4769, term.cost);
     }
 }

@@ -1,5 +1,6 @@
 pub mod build;
 pub mod char;
+pub mod dict;
 pub mod fst;
 pub mod lattice;
 pub mod matrix;

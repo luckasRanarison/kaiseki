@@ -1,7 +1,9 @@
 use crate::{
+    dict::EntryDictionary,
     fst::FstSearcher,
     lattice::{Lattice, Node},
     matrix::CostMatrix,
+    term::{Term, TermId},
 };
 use anyhow::Error;
 
@@ -12,16 +14,24 @@ pub struct Token {
     pub end: usize,
 }
 
+impl Token {
+    pub fn new(text: String, start: usize, end: usize) -> Self {
+        Self { text, start, end }
+    }
+}
+
 pub struct Tokenizer {
     fst: FstSearcher,
+    dict: EntryDictionary,
     matrix: CostMatrix,
 }
 
 impl Tokenizer {
     pub fn default() -> Result<Self, Error> {
         Ok(Self {
-            fst: FstSearcher::default()?,
-            matrix: CostMatrix::default()?,
+            fst: FstSearcher::load()?,
+            dict: EntryDictionary::load()?,
+            matrix: CostMatrix::load()?,
         })
     }
 
@@ -35,13 +45,13 @@ impl Tokenizer {
             }
 
             let substr = &input[index..];
-            let terms = self.fst.get_terms(substr);
+            let terms = self.get_terms_from_str(substr);
 
-            for (len, term_id, term) in terms {
+            for (term_id, term) in terms {
                 lattice.add_node(Node::new(
                     term_id,
                     index,
-                    index + len,
+                    index + term.length,
                     term.context_id,
                     term.cost,
                 ));
@@ -58,14 +68,23 @@ impl Tokenizer {
             };
             let text = input[node.start..end].to_owned();
 
-            tokens.push(Token {
-                text,
-                start: node.start,
-                end,
-            })
+            tokens.push(Token::new(text, node.start, end));
         }
 
         tokens
+    }
+
+    fn get_terms_from_str(&self, input: &str) -> Vec<(TermId, Term)> {
+        let term_id = self.fst.get_all(input);
+        let mut terms = Vec::new();
+
+        for id in term_id {
+            if let Some(term) = self.dict.get_term(id) {
+                terms.push((id, term.clone()));
+            }
+        }
+
+        terms
     }
 }
 

@@ -122,13 +122,12 @@ impl Lattice {
 
 #[cfg(test)]
 mod tests {
-    use super::{Lattice, Node};
-    use crate::matrix::CostMatrix;
+    use super::*;
 
     #[test]
     fn test_find_path() {
         let mut lattice = Lattice::new(18);
-        let cost_matrix = CostMatrix::default().unwrap();
+        let cost_matrix = CostMatrix::load().unwrap();
 
         lattice.add_node(Node::new(1, 0, 3, 5, 6245)); // 東
         lattice.add_node(Node::new(2, 0, 6, 3, 3003)); // 東京
