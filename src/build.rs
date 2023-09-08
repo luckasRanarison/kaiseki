@@ -2,7 +2,7 @@ use crate::{
     char::{CharCategory, CharTable},
     row::Row,
     term::Term,
-    unk::UnkDictionary,
+    unk::UnknownDictionary,
 };
 use anyhow::{Error, Ok};
 use bincode::{config, encode_into_std_write};
@@ -180,17 +180,17 @@ pub fn build_unk() -> Result<(), Error> {
     let buffer = read_mecab_file("unk.def")?;
     let mut unk_term_map = HashMap::new();
 
-    for line in buffer.lines() {
+    for (id, line) in buffer.lines().enumerate() {
         let row = Row::try_from(line)?;
         let term = Term::from(&row);
 
         unk_term_map
             .entry(row.surface_form.to_string())
             .or_insert_with(Vec::new)
-            .push(term);
+            .push((id, term));
     }
 
-    let unk_dict = UnkDictionary::new(unk_term_map);
+    let unk_dict = UnknownDictionary::new(unk_term_map);
     let path = Path::new("dict").join("unk.bin");
     let config = config::standard();
     let mut handle = File::create(path)?;
@@ -228,7 +228,7 @@ fn parse_char_map(line: &str) -> Result<(u32, u32, Vec<&str>), Error> {
         categories.push(category);
     }
 
-    Ok((upper, lower, categories))
+    Ok((lower, upper, categories))
 }
 
 fn parse_hex(hex: &str) -> Result<u32, Error> {

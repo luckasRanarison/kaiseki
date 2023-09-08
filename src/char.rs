@@ -63,5 +63,10 @@ mod tests {
         ];
 
         assert_eq!(&expected, categories);
+
+        let categories = lookup_table.lookup('1');
+        let expected = vec![CharCategory::new("NUMERIC".to_owned(), true, true, 0)];
+
+        assert_eq!(&expected, categories);
     }
 }

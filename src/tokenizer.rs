@@ -1,9 +1,11 @@
 use crate::{
+    char::CharTable,
     dict::EntryDictionary,
     fst::FstSearcher,
     lattice::{Lattice, Node},
     matrix::CostMatrix,
-    term::{Term, TermId},
+    term::ExtratedTerm,
+    unk::UnknownDictionary,
 };
 use anyhow::Error;
 
@@ -23,6 +25,8 @@ impl Token {
 pub struct Tokenizer {
     fst: FstSearcher,
     dict: EntryDictionary,
+    unk_dict: UnknownDictionary,
+    char_table: CharTable,
     matrix: CostMatrix,
 }
 
@@ -31,6 +35,8 @@ impl Tokenizer {
         Ok(Self {
             fst: FstSearcher::load()?,
             dict: EntryDictionary::load()?,
+            unk_dict: UnknownDictionary::load()?,
+            char_table: CharTable::load()?,
             matrix: CostMatrix::load()?,
         })
     }
@@ -45,15 +51,19 @@ impl Tokenizer {
             }
 
             let substr = &input[index..];
-            let terms = self.get_terms_from_str(substr);
+            let mut extracted = self.get_terms_from_str(substr);
+            let found = !extracted.is_empty();
+            let unknown = self.get_unkown_terms_from_str(substr, found);
 
-            for (term_id, term) in terms {
+            extracted.extend(unknown);
+
+            for term in extracted {
                 lattice.add_node(Node::new(
-                    term_id,
+                    term.id,
                     index,
                     index + term.length,
-                    term.context_id,
-                    term.cost,
+                    term.value.context_id,
+                    term.value.cost,
                 ));
             }
         }
@@ -74,17 +84,55 @@ impl Tokenizer {
         tokens
     }
 
-    fn get_terms_from_str(&self, input: &str) -> Vec<(TermId, Term)> {
-        let term_id = self.fst.get_all(input);
-        let mut terms = Vec::new();
+    fn get_terms_from_str(&self, input: &str) -> Vec<ExtratedTerm> {
+        let terms = self.fst.get_from_prefix(input);
+        let mut extracted = Vec::new();
 
-        for id in term_id {
+        for (len, id) in terms {
             if let Some(term) = self.dict.get_term(id) {
-                terms.push((id, term.clone()));
+                extracted.push(ExtratedTerm::new(id, len, term.clone()));
             }
         }
 
-        terms
+        extracted
+    }
+
+    fn get_unkown_terms_from_str(&self, input: &str, found: bool) -> Vec<ExtratedTerm> {
+        let mut unk_terms = Vec::new();
+        let mut chars = input.chars().peekable();
+        let mut current_len = 0;
+        let ch = chars.next().unwrap();
+        let char_categories = self.char_table.lookup(ch);
+
+        current_len += ch.len_utf8();
+
+        for category in char_categories {
+            if found && !category.invoke {
+                continue;
+            }
+
+            if category.group {
+                while let Some(ch) = chars.next() {
+                    if self.char_table.lookup(ch).contains(category) {
+                        current_len += ch.len_utf8();
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                if let Some(ch) = chars.next() {
+                    current_len += ch.len_utf8();
+                }
+            }
+
+            if let Some(terms) = self.unk_dict.get_terms(&category.name) {
+                for (id, value) in terms {
+                    unk_terms.push(ExtratedTerm::new(*id, current_len, value.clone()));
+                }
+            }
+        }
+
+        unk_terms
     }
 }
 
@@ -97,6 +145,16 @@ mod tests {
         let tokenizer = Tokenizer::default().unwrap();
         let tokens = tokenizer.tokenize("東京都に住む");
         let expected = vec!["東京", "都", "に", "住む"];
+        let text: Vec<_> = tokens.iter().map(|token| &token.text).collect();
+
+        assert_eq!(expected, text);
+    }
+
+    #[test]
+    fn test_tokenizer_unkown() {
+        let tokenizer = Tokenizer::default().unwrap();
+        let tokens = tokenizer.tokenize("1234個");
+        let expected = vec!["1234", "個"];
         let text: Vec<_> = tokens.iter().map(|token| &token.text).collect();
 
         assert_eq!(expected, text);
