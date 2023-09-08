@@ -12,7 +12,7 @@ type TermMap = BTreeMap<String, Vec<Term>>;
 type FeatMap = BTreeMap<String, Vec<Feature>>;
 
 pub fn get_entry_map() -> Result<(TermMap, FeatMap), Error> {
-    println!("Decoding mecab IPA dictionary files...");
+    println!("> Decoding mecab IPA dictionary files...");
 
     let mut decoded_files = Vec::new();
     let mut rows = Vec::new();
@@ -41,11 +41,13 @@ pub fn get_entry_map() -> Result<(TermMap, FeatMap), Error> {
             .push(Feature::from(&row));
     }
 
+    println!("File decoding complete ✓");
+
     Ok((term_map, feat_map))
 }
 
 pub fn read_mecab_file(filename: &str) -> Result<String, Error> {
-    let path = Path::new("dict").join(filename);
+    let path = Path::new("mecab").join(filename);
     let bytes = fs::read(path)?;
     let (buffer, _, _) = EUC_JP.decode(&bytes);
 
@@ -53,9 +55,9 @@ pub fn read_mecab_file(filename: &str) -> Result<String, Error> {
 }
 
 pub fn build_fst(term_map: &TermMap) -> Result<(), Error> {
-    println!("Building FST...");
+    println!("> Building FST...");
 
-    let path = Path::new("dict").join("term.fst");
+    let path = Path::new("mecab").join("term.fst");
     let handle = File::create(path)?;
     let mut map_builder = MapBuilder::new(handle)?;
     let mut id = 0u64;
@@ -69,13 +71,13 @@ pub fn build_fst(term_map: &TermMap) -> Result<(), Error> {
 
     map_builder.finish()?;
 
-    println!("term.fst has been created");
+    println!("term.fst has been created ✓");
 
     Ok(())
 }
 
 pub fn build_term(term_map: &TermMap) -> Result<(), Error> {
-    println!("Building term values...");
+    println!("> Building term values...");
 
     let mut term_values = Vec::new();
 
@@ -83,18 +85,18 @@ pub fn build_term(term_map: &TermMap) -> Result<(), Error> {
         term_values.extend(value.clone());
     }
 
-    let path = Path::new("dict").join("term.bin");
+    let path = Path::new("mecab").join("term.bin");
     let mut handle = File::create(path)?;
 
     encode_into_std_write(term_values, &mut handle, *BINCODE_CONFIG)?;
 
-    println!("term.bin has been created");
+    println!("term.bin has been created ✓");
 
     Ok(())
 }
 
 pub fn build_feature(feat_map: FeatMap) -> Result<(), Error> {
-    println!("Building feature...");
+    println!("> Building feature...");
 
     let mut feat_values = Vec::new();
 
@@ -102,18 +104,18 @@ pub fn build_feature(feat_map: FeatMap) -> Result<(), Error> {
         feat_values.extend(value.clone());
     }
 
-    let path = Path::new("dict").join("feature.bin");
+    let path = Path::new("mecab").join("feature.bin");
     let mut handle = File::create(path)?;
 
     encode_into_std_write(feat_values, &mut handle, *BINCODE_CONFIG)?;
 
-    println!("feature.bin has been created");
+    println!("feature.bin has been created ✓");
 
     Ok(())
 }
 
 pub fn build_matrix() -> Result<(), Error> {
-    println!("Building cost matrix...");
+    println!("> Building cost matrix...");
 
     let buffer = read_mecab_file("matrix.def")?;
     let mut lines = buffer.lines();
@@ -132,18 +134,18 @@ pub fn build_matrix() -> Result<(), Error> {
         cost_matrix[right_id][left_id] = cost;
     }
 
-    let path = Path::new("dict").join("matrix.bin");
+    let path = Path::new("mecab").join("matrix.bin");
     let mut handle = File::create(path)?;
 
     encode_into_std_write(cost_matrix, &mut handle, *BINCODE_CONFIG)?;
 
-    println!("matrix.bin has been created");
+    println!("matrix.bin has been created ✓");
 
     Ok(())
 }
 
 pub fn build_char_def() -> Result<(), Error> {
-    println!("Buiding char definition..");
+    println!("> Buiding char definition..");
 
     let buffer = read_mecab_file("char.def")?;
     let mut boundaries = Vec::new();
@@ -180,18 +182,18 @@ pub fn build_char_def() -> Result<(), Error> {
     }
 
     let char_table = CharTable::new(char_category_map);
-    let path = Path::new("dict").join("char.bin");
+    let path = Path::new("mecab").join("char.bin");
     let mut handle = File::create(path)?;
 
     encode_into_std_write(char_table, &mut handle, *BINCODE_CONFIG)?;
 
-    println!("char.bin has been created");
+    println!("char.bin has been created ✓");
 
     Ok(())
 }
 
 pub fn build_unk() -> Result<(), Error> {
-    println!("Building unknown dictionary...");
+    println!("> Building unknown dictionary...");
 
     let buffer = read_mecab_file("unk.def")?;
     let mut unk_term_map = HashMap::new();
@@ -210,12 +212,12 @@ pub fn build_unk() -> Result<(), Error> {
     }
 
     let unk_dict = UnknownDictionary::new(unk_term_map, feature);
-    let path = Path::new("dict").join("unk.bin");
+    let path = Path::new("mecab").join("unk.bin");
     let mut handle = File::create(path)?;
 
     encode_into_std_write(unk_dict, &mut handle, *BINCODE_CONFIG)?;
 
-    println!("unk.bin has been created");
+    println!("unk.bin has been created ✓");
 
     Ok(())
 }
@@ -276,7 +278,7 @@ fn parse_category(line: &str) -> Result<(String, CharCategory), Error> {
 }
 
 fn get_csv_files() -> Result<Vec<String>, Error> {
-    let path = Path::new("dict");
+    let path = Path::new("mecab");
     let entries = path.read_dir()?;
     let mut files = Vec::new();
 
@@ -294,7 +296,7 @@ fn get_csv_files() -> Result<Vec<String>, Error> {
 }
 
 fn main() -> Result<(), Error> {
-    println!("Building kaiseki ressources..");
+    println!("----- Building kaiseki ressources -----\n");
 
     let (term_map, feat_map) = get_entry_map()?;
 
@@ -305,7 +307,7 @@ fn main() -> Result<(), Error> {
     build_term(&term_map)?;
     build_feature(feat_map)?;
 
-    println!("Build complete!");
+    println!("\nBuild complete!");
 
     Ok(())
 }

@@ -7,7 +7,7 @@ use crate::{
 use bincode::{decode_from_slice, Decode, Encode};
 use std::collections::HashMap;
 
-const UNK: &'static [u8] = include_bytes!("../dict/unk.bin");
+const UNK: &'static [u8] = include_bytes!("../mecab/unk.bin");
 
 type TermMap = HashMap<String, Vec<(TermId, Term)>>;
 

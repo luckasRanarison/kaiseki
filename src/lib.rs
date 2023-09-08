@@ -13,7 +13,8 @@ mod unk;
 mod utils;
 
 pub mod error;
-pub use pos::PartOfSpeech;
+pub use conjugation::*;
+pub use pos::*;
 pub use tokenizer::*;
 
 pub mod build {

@@ -1,8 +1,8 @@
 use crate::{
-    build::Feature,
     char::CharTable,
     dict::EntryDictionary,
     error::Error,
+    feature::Feature,
     fst::FstSearcher,
     lattice::{Lattice, Node},
     matrix::CostMatrix,
