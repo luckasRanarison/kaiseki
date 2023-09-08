@@ -3,9 +3,10 @@ use crate::{
     row::Row,
     term::Term,
     unk::UnknownDictionary,
+    utils::BINCODE_CONFIG,
 };
 use anyhow::{Error, Ok};
-use bincode::{config, encode_into_std_write};
+use bincode::encode_into_std_write;
 use encoding_rs::EUC_JP;
 use fst::MapBuilder;
 use std::{
@@ -83,11 +84,10 @@ pub fn build_term(term_map: &TermMap) -> Result<(), Error> {
         term_values.extend(value.clone());
     }
 
-    let config = config::standard();
     let path = Path::new("dict").join("term.bin");
     let mut handle = File::create(path)?;
 
-    encode_into_std_write(term_values, &mut handle, config)?;
+    encode_into_std_write(term_values, &mut handle, *BINCODE_CONFIG)?;
 
     println!("term.bin has been created");
 
@@ -115,10 +115,9 @@ pub fn build_matrix() -> Result<(), Error> {
     }
 
     let path = Path::new("dict").join("matrix.bin");
-    let config = config::standard();
     let mut handle = File::create(path)?;
 
-    encode_into_std_write(cost_matrix, &mut handle, config)?;
+    encode_into_std_write(cost_matrix, &mut handle, *BINCODE_CONFIG)?;
 
     println!("matrix.bin has been created");
 
@@ -164,10 +163,9 @@ pub fn build_char_def() -> Result<(), Error> {
 
     let char_table = CharTable::new(char_category_map);
     let path = Path::new("dict").join("char.bin");
-    let config = config::standard();
     let mut handle = File::create(path)?;
 
-    encode_into_std_write(char_table, &mut handle, config)?;
+    encode_into_std_write(char_table, &mut handle, *BINCODE_CONFIG)?;
 
     println!("char.bin has been created");
 
@@ -192,10 +190,9 @@ pub fn build_unk() -> Result<(), Error> {
 
     let unk_dict = UnknownDictionary::new(unk_term_map);
     let path = Path::new("dict").join("unk.bin");
-    let config = config::standard();
     let mut handle = File::create(path)?;
 
-    encode_into_std_write(unk_dict, &mut handle, config)?;
+    encode_into_std_write(unk_dict, &mut handle, *BINCODE_CONFIG)?;
 
     println!("unk.bin has been created");
 

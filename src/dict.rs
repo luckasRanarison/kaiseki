@@ -1,6 +1,9 @@
-use crate::term::{Term, TermId};
+use crate::{
+    term::{Term, TermId},
+    utils::BINCODE_CONFIG,
+};
 use anyhow::Error;
-use bincode::{config, decode_from_slice};
+use bincode::decode_from_slice;
 
 const TERMS: &'static [u8] = include_bytes!("../dict/term.bin");
 
@@ -10,8 +13,7 @@ pub struct EntryDictionary {
 
 impl EntryDictionary {
     pub fn load() -> Result<Self, Error> {
-        let config = config::standard();
-        let (terms, _) = decode_from_slice(TERMS, config)?;
+        let (terms, _) = decode_from_slice(TERMS, *BINCODE_CONFIG)?;
 
         Ok(Self { terms })
     }

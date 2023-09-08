@@ -1,5 +1,6 @@
+use crate::utils::BINCODE_CONFIG;
 use anyhow::Error;
-use bincode::{config, decode_from_slice, Decode, Encode};
+use bincode::{decode_from_slice, Decode, Encode};
 
 const CHAR_DEF: &'static [u8] = include_bytes!("../dict/char.bin");
 
@@ -14,8 +15,7 @@ impl CharTable {
     }
 
     pub fn load() -> Result<Self, Error> {
-        let config = config::standard();
-        let (char_def, _) = decode_from_slice(CHAR_DEF, config)?;
+        let (char_def, _) = decode_from_slice(CHAR_DEF, *BINCODE_CONFIG)?;
 
         Ok(char_def)
     }

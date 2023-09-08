@@ -8,3 +8,4 @@ pub mod row;
 pub mod term;
 pub mod tokenizer;
 pub mod unk;
+pub mod utils;

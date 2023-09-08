@@ -1,5 +1,6 @@
+use crate::utils::BINCODE_CONFIG;
 use anyhow::Error;
-use bincode::{config, decode_from_slice};
+use bincode::decode_from_slice;
 
 const COST_MATRIX: &'static [u8] = include_bytes!("../dict/matrix.bin");
 
@@ -9,8 +10,7 @@ pub struct CostMatrix {
 
 impl CostMatrix {
     pub fn load() -> Result<Self, Error> {
-        let config = config::standard();
-        let (matrix, _) = decode_from_slice(&COST_MATRIX, config)?;
+        let (matrix, _) = decode_from_slice(&COST_MATRIX, *BINCODE_CONFIG)?;
 
         Ok(Self { matrix })
     }
