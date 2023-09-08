@@ -119,10 +119,6 @@ impl Tokenizer {
                         break;
                     }
                 }
-            } else {
-                if let Some(ch) = chars.next() {
-                    current_len += ch.len_utf8();
-                }
             }
 
             if let Some(terms) = self.unk_dict.get_terms(&category.name) {
