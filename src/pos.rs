@@ -1,6 +1,6 @@
 use bincode::{Decode, Encode};
 
-#[derive(Debug, Clone, Encode, Decode)]
+#[derive(Debug, Clone, PartialEq, Encode, Decode)]
 pub enum PartOfSpeech {
     Common,                     // 一般
     Counter,                    // 助数詞

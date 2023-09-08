@@ -1,4 +1,5 @@
 use crate::{
+    build::Feature,
     error::Error,
     term::{Term, TermId},
     utils::BINCODE_CONFIG,
@@ -13,11 +14,12 @@ type TermMap = HashMap<String, Vec<(TermId, Term)>>;
 #[derive(Debug, Encode, Decode)]
 pub struct UnknownDictionary {
     terms: TermMap,
+    feature: Vec<Feature>,
 }
 
 impl UnknownDictionary {
-    pub fn new(terms: TermMap) -> Self {
-        Self { terms }
+    pub fn new(terms: TermMap, feature: Vec<Feature>) -> Self {
+        Self { terms, feature }
     }
 }
 
@@ -30,6 +32,10 @@ impl UnknownDictionary {
 
     pub fn get_terms(&self, key: &str) -> Option<&Vec<(TermId, Term)>> {
         self.terms.get(key)
+    }
+
+    pub fn get_feat(&self, id: TermId) -> Option<&Feature> {
+        self.feature.get(id)
     }
 }
 

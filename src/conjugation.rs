@@ -1,6 +1,6 @@
 use bincode::{Decode, Encode};
 
-#[derive(Debug, Clone, Encode, Decode)]
+#[derive(Debug, Clone, PartialEq,  Encode, Decode)]
 pub enum ConjugationForm {
     ClassicalBasicForm,          // 文語基本形
     IrrealisForm,                // 未然形

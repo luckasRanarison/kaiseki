@@ -9,7 +9,7 @@ use std::{
 };
 
 type TermMap = BTreeMap<String, Vec<Term>>;
-type FeatMap = HashMap<String, Vec<Feature>>;
+type FeatMap = BTreeMap<String, Vec<Feature>>;
 
 pub fn get_entry_map() -> Result<(TermMap, FeatMap), Error> {
     println!("Decoding mecab IPA dictionary files...");
@@ -17,7 +17,7 @@ pub fn get_entry_map() -> Result<(TermMap, FeatMap), Error> {
     let mut decoded_files = Vec::new();
     let mut rows = Vec::new();
     let mut term_map = BTreeMap::new();
-    let mut feat_map = HashMap::new();
+    let mut feat_map = BTreeMap::new();
 
     for file in get_csv_files()? {
         decoded_files.push(read_mecab_file(&file)?);
@@ -195,6 +195,7 @@ pub fn build_unk() -> Result<(), Error> {
 
     let buffer = read_mecab_file("unk.def")?;
     let mut unk_term_map = HashMap::new();
+    let mut feature = Vec::new();
 
     for (id, line) in buffer.lines().enumerate() {
         let row = Row::try_from(line)?;
@@ -204,9 +205,11 @@ pub fn build_unk() -> Result<(), Error> {
             .entry(row.surface_form.to_string())
             .or_insert_with(Vec::new)
             .push((id, term));
+
+        feature.push(Feature::from(&row));
     }
 
-    let unk_dict = UnknownDictionary::new(unk_term_map);
+    let unk_dict = UnknownDictionary::new(unk_term_map, feature);
     let path = Path::new("dict").join("unk.bin");
     let mut handle = File::create(path)?;
 
@@ -291,6 +294,8 @@ fn get_csv_files() -> Result<Vec<String>, Error> {
 }
 
 fn main() -> Result<(), Error> {
+    println!("Building kaiseki ressources..");
+
     let (term_map, feat_map) = get_entry_map()?;
 
     build_char_def()?;

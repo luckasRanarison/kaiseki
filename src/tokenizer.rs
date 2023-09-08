@@ -1,4 +1,5 @@
 use crate::{
+    build::Feature,
     char::CharTable,
     dict::EntryDictionary,
     error::Error,
@@ -14,11 +15,17 @@ pub struct Token {
     pub text: String,
     pub start: usize,
     pub end: usize,
+    pub feature: Feature,
 }
 
 impl Token {
-    pub fn new(text: String, start: usize, end: usize) -> Self {
-        Self { text, start, end }
+    pub fn new(text: String, start: usize, end: usize, feature: Feature) -> Self {
+        Self {
+            text,
+            start,
+            end,
+            feature,
+        }
     }
 }
 
@@ -60,6 +67,7 @@ impl Tokenizer {
             for term in extracted {
                 lattice.add_node(Node::new(
                     term.id,
+                    term.unknown,
                     index,
                     index + term.length,
                     term.value.context_id,
@@ -77,8 +85,13 @@ impl Tokenizer {
                 false => node.end,
             };
             let text = input[node.start..end].to_owned();
+            let feature = match node.unknown {
+                true => self.unk_dict.get_feat(node.term_id),
+                false => self.dict.get_feat(node.term_id),
+            };
+            let feature = feature.cloned().unwrap_or_default();
 
-            tokens.push(Token::new(text, node.start, end));
+            tokens.push(Token::new(text, node.start, end, feature));
         }
 
         tokens
@@ -90,7 +103,7 @@ impl Tokenizer {
 
         for (len, id) in terms {
             if let Some(term) = self.dict.get_term(id) {
-                extracted.push(ExtratedTerm::new(id, len, term.clone()));
+                extracted.push(ExtratedTerm::new(id, false, len, term.clone()));
             }
         }
 
@@ -123,7 +136,7 @@ impl Tokenizer {
 
             if let Some(terms) = self.unk_dict.get_terms(&category.name) {
                 for (id, value) in terms {
-                    unk_terms.push(ExtratedTerm::new(*id, current_len, value.clone()));
+                    unk_terms.push(ExtratedTerm::new(*id, true, current_len, value.clone()));
                 }
             }
         }
@@ -139,6 +152,8 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, Error> {
 #[cfg(test)]
 mod tests {
     use super::Tokenizer;
+    use crate::conjugation::ConjugationForm as C;
+    use crate::pos::PartOfSpeech as P;
 
     #[test]
     fn test_tokenizer() {
@@ -158,5 +173,36 @@ mod tests {
         let text: Vec<_> = tokens.iter().map(|token| &token.text).collect();
 
         assert_eq!(expected, text);
+    }
+
+    #[test]
+    fn test_token_feature() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("ケーキを食べる");
+
+        let feat = &tokens[0].feature;
+        assert!(feat.part_of_speech.contains(&P::Noun));
+        assert_eq!(Some("ケーキ".to_owned()), feat.reading);
+
+        let feat = &tokens[1].feature;
+        assert!(feat.part_of_speech.contains(&P::Particle));
+        assert_eq!(Some("ヲ".to_owned()), feat.reading);
+
+        let feat = &tokens[2].feature;
+        assert!(feat.part_of_speech.contains(&P::Verb));
+        assert_eq!(Some(C::BasicForm), feat.conjugation_form);
+        assert_eq!(Some("タベル".to_owned()), feat.reading);
+    }
+
+    #[test]
+    fn test_token_feature_unknown() {
+        let tokenizer = Tokenizer::new().unwrap();
+        let tokens = tokenizer.tokenize("100 ");
+
+        let feat = &tokens[0].feature;
+        assert!(feat.part_of_speech.contains(&P::Number));
+
+        let feat = &tokens[1].feature;
+        assert!(feat.part_of_speech.contains(&P::Space));
     }
 }

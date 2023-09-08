@@ -8,6 +8,7 @@ type NodeId = usize;
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Node {
     pub term_id: TermId,
+    pub unknown: bool,
     pub start: usize,
     pub end: usize,
     pub context_id: u16,
@@ -17,9 +18,17 @@ pub struct Node {
 }
 
 impl Node {
-    pub fn new(term_id: usize, start: usize, end: usize, context_id: u16, cost: i16) -> Self {
+    pub fn new(
+        term_id: usize,
+        unknown: bool,
+        start: usize,
+        end: usize,
+        context_id: u16,
+        cost: i16,
+    ) -> Self {
         Self {
             term_id,
+            unknown,
             start,
             end,
             context_id,
@@ -129,14 +138,14 @@ mod tests {
         let mut lattice = Lattice::new(18);
         let cost_matrix = CostMatrix::load().unwrap();
 
-        lattice.add_node(Node::new(1, 0, 3, 5, 6245)); // 東
-        lattice.add_node(Node::new(2, 0, 6, 3, 3003)); // 東京
-        lattice.add_node(Node::new(3, 3, 6, 3, 10791)); // 京
-        lattice.add_node(Node::new(4, 6, 9, 5, 7595)); // 都
-        lattice.add_node(Node::new(5, 6, 9, 6, 9428)); // 都
-        lattice.add_node(Node::new(6, 9, 12, 1, 4303)); // に
-        lattice.add_node(Node::new(7, 9, 12, 2, 11880)); // に
-        lattice.add_node(Node::new(8, 12, 18, 4, 7048)); // 住む
+        lattice.add_node(Node::new(1, false, 0, 3, 5, 6245)); // 東
+        lattice.add_node(Node::new(2, false, 0, 6, 3, 3003)); // 東京
+        lattice.add_node(Node::new(3, false, 3, 6, 3, 10791)); // 京
+        lattice.add_node(Node::new(4, false, 6, 9, 5, 7595)); // 都
+        lattice.add_node(Node::new(5, false, 6, 9, 6, 9428)); // 都
+        lattice.add_node(Node::new(6, false, 9, 12, 1, 4303)); // に
+        lattice.add_node(Node::new(7, false, 9, 12, 2, 11880)); // に
+        lattice.add_node(Node::new(8, false, 12, 18, 4, 7048)); // 住む
 
         let nodes = lattice.find_path(&cost_matrix);
 

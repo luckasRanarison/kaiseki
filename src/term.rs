@@ -27,12 +27,18 @@ impl Term {
 #[derive(Debug)]
 pub struct ExtratedTerm {
     pub id: TermId,
+    pub unknown: bool,
     pub length: usize,
     pub value: Term,
 }
 
 impl ExtratedTerm {
-    pub fn new(id: TermId, length: usize, value: Term) -> Self {
-        Self { id, length, value }
+    pub fn new(id: TermId, unknown: bool, length: usize, value: Term) -> Self {
+        Self {
+            id,
+            unknown,
+            length,
+            value,
+        }
     }
 }

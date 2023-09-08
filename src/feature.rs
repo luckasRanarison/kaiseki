@@ -1,7 +1,7 @@
 use crate::{conjugation::ConjugationForm, row::Row, PartOfSpeech};
 use bincode::{Decode, Encode};
 
-#[derive(Clone, Encode, Decode)]
+#[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
 pub struct Feature {
     pub part_of_speech: Vec<PartOfSpeech>,
     pub conjugation_form: Option<ConjugationForm>,
