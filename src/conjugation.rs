@@ -1,6 +1,5 @@
-use std::fmt::Display;
-
 use bincode::{Decode, Encode};
+use std::fmt;
 
 #[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
 pub enum ConjugationType {
@@ -132,8 +131,8 @@ impl From<&str> for ConjugationType {
     }
 }
 
-impl Display for ConjugationType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for ConjugationType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Self::BungoKeri => "文語・ケリ",
             Self::IchidanEru => "一段・得ル",
@@ -268,8 +267,8 @@ impl From<&str> for ConjugationForm {
     }
 }
 
-impl Display for ConjugationForm {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for ConjugationForm {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Self::ClassicalBasicForm => "文語基本形",
             Self::IrrealisForm => "未然形",

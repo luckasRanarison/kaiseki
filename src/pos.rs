@@ -1,6 +1,5 @@
-use std::fmt::Display;
-
 use bincode::{Decode, Encode};
+use std::fmt;
 
 #[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
 pub enum PosMain {
@@ -40,8 +39,8 @@ impl From<&str> for PosMain {
     }
 }
 
-impl Display for PosMain {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl fmt::Display for PosMain {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match self {
             Self::Noun => "名詞",
             Self::Verb => "動詞",
@@ -170,8 +169,8 @@ impl From<&str> for PosSub {
     }
 }
 
-impl Display for PosSub {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl fmt::Display for PosSub {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match self {
             Self::General => "一般",
             Self::ProperNoun => "固有名詞",
