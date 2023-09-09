@@ -6,8 +6,8 @@ use crate::{
 };
 use bincode::decode_from_slice;
 
-const TERMS: &'static [u8] = include_bytes!("../mecab/term.bin");
-const FEATURES: &'static [u8] = include_bytes!("../mecab/feature.bin");
+const TERMS: &'static [u8] = include_bytes!("../bin/term.bin");
+const FEATURES: &'static [u8] = include_bytes!("../bin/feature.bin");
 
 pub struct EntryDictionary {
     terms: Vec<Term>,

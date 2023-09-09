@@ -57,8 +57,7 @@ pub fn read_mecab_file(filename: &str) -> Result<String, Error> {
 pub fn build_fst(term_map: &TermMap) -> Result<(), Error> {
     println!("> Building FST...");
 
-    let path = Path::new("mecab").join("term.fst");
-    let handle = File::create(path)?;
+    let handle = File::create("bin/term.fst")?;
     let mut map_builder = MapBuilder::new(handle)?;
     let mut id = 0u64;
 
@@ -85,8 +84,7 @@ pub fn build_term(term_map: &TermMap) -> Result<(), Error> {
         term_values.extend(value.clone());
     }
 
-    let path = Path::new("mecab").join("term.bin");
-    let mut handle = File::create(path)?;
+    let mut handle = File::create("bin/term.bin")?;
 
     encode_into_std_write(term_values, &mut handle, *BINCODE_CONFIG)?;
 
@@ -104,8 +102,7 @@ pub fn build_feature(feat_map: FeatMap) -> Result<(), Error> {
         feat_values.extend(value.clone());
     }
 
-    let path = Path::new("mecab").join("feature.bin");
-    let mut handle = File::create(path)?;
+    let mut handle = File::create("bin/feature.bin")?;
 
     encode_into_std_write(feat_values, &mut handle, *BINCODE_CONFIG)?;
 
@@ -134,8 +131,7 @@ pub fn build_matrix() -> Result<(), Error> {
         cost_matrix[right_id][left_id] = cost;
     }
 
-    let path = Path::new("mecab").join("matrix.bin");
-    let mut handle = File::create(path)?;
+    let mut handle = File::create("bin/matrix.bin")?;
 
     encode_into_std_write(cost_matrix, &mut handle, *BINCODE_CONFIG)?;
 
@@ -182,8 +178,7 @@ pub fn build_char_def() -> Result<(), Error> {
     }
 
     let char_table = CharTable::new(char_category_map);
-    let path = Path::new("mecab").join("char.bin");
-    let mut handle = File::create(path)?;
+    let mut handle = File::create("bin/char.bin")?;
 
     encode_into_std_write(char_table, &mut handle, *BINCODE_CONFIG)?;
 
@@ -212,8 +207,7 @@ pub fn build_unk() -> Result<(), Error> {
     }
 
     let unk_dict = UnknownDictionary::new(unk_term_map, feature);
-    let path = Path::new("mecab").join("unk.bin");
-    let mut handle = File::create(path)?;
+    let mut handle = File::create("bin/unk.bin")?;
 
     encode_into_std_write(unk_dict, &mut handle, *BINCODE_CONFIG)?;
 
@@ -278,8 +272,7 @@ fn parse_category(line: &str) -> Result<(String, CharCategory), Error> {
 }
 
 fn get_csv_files() -> Result<Vec<String>, Error> {
-    let path = Path::new("mecab");
-    let entries = path.read_dir()?;
+    let entries = fs::read_dir("mecab")?;
     let mut files = Vec::new();
 
     for entry in entries {

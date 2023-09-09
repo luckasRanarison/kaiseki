@@ -1,7 +1,7 @@
 use crate::{error::Error, term::TermId};
 use fst::{raw::Output, Map};
 
-const FST: &'static [u8] = include_bytes!("../mecab/term.fst");
+const FST: &'static [u8] = include_bytes!("../bin/term.fst");
 
 pub struct FstSearcher {
     map: Map<&'static [u8]>,

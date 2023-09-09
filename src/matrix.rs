@@ -1,7 +1,7 @@
 use crate::{error::Error, utils::BINCODE_CONFIG};
 use bincode::decode_from_slice;
 
-const COST_MATRIX: &'static [u8] = include_bytes!("../mecab/matrix.bin");
+const COST_MATRIX: &'static [u8] = include_bytes!("../bin/matrix.bin");
 
 pub struct CostMatrix {
     matrix: Vec<Vec<i16>>,
