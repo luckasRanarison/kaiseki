@@ -93,7 +93,7 @@ impl Lattice {
                     let total_cost = prev_cost + current_cost as i32 + connection_cost as i32;
 
                     if total_cost < current.total_cost {
-                        let mut node = &mut self.nodes[current_id];
+                        let node = &mut self.nodes[current_id];
                         node.total_cost = total_cost;
                         node.prev_node = Some(prev_id);
                     }

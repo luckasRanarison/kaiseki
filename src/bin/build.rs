@@ -137,7 +137,7 @@ fn build_char_def() -> Result<(), Error> {
     let mut category_def_map = HashMap::new();
 
     for line in buffer.lines() {
-        if line.starts_with("#") || line.is_empty() {
+        if line.starts_with('#') || line.is_empty() {
             continue;
         }
 
@@ -245,15 +245,9 @@ fn parse_category(line: &str) -> Result<(String, CharCategory), Error> {
     let fields: Vec<_> = line.split_whitespace().collect();
     let name = fields[0].to_owned();
     let invoke: u8 = fields[1].parse()?;
-    let invoke = match invoke {
-        1 => true,
-        _ => false,
-    };
+    let invoke = matches!(invoke, 1);
     let group: u8 = fields[2].parse()?;
-    let group = match group {
-        1 => true,
-        _ => false,
-    };
+    let group = matches!(group, 1);
     let length = fields[3].parse()?;
     let category = CharCategory::new(name.clone(), invoke, group, length);
 

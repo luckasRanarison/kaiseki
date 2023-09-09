@@ -125,7 +125,7 @@ impl Tokenizer {
             }
 
             if category.group {
-                while let Some(ch) = chars.next() {
+                for ch in chars.by_ref() {
                     if self.char_table.lookup(ch).contains(category) {
                         current_len += ch.len_utf8();
                     } else {

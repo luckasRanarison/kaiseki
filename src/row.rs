@@ -21,7 +21,7 @@ impl<'a> TryFrom<&'a str> for Row<'a> {
     type Error = Error;
 
     fn try_from(line: &'a str) -> Result<Self, Error> {
-        let values: Vec<_> = line.split(",").collect();
+        let values: Vec<_> = line.split(',').collect();
         let map = |idx: usize| values.get(idx).filter(|val| *val != &"*").cloned();
 
         Ok(Row {

@@ -14,10 +14,8 @@ impl From<&Row<'_>> for Feature {
         let mut part_of_speech = vec![PartOfSpeech::from(value.pos)];
         let pos_sub = &[value.pos_sub1, value.pos_sub2, value.pos_sub3];
 
-        for pos in pos_sub {
-            if let Some(pos) = pos {
-                part_of_speech.push(PartOfSpeech::from(*pos));
-            }
+        for pos in pos_sub.iter().flatten() {
+            part_of_speech.push(PartOfSpeech::from(*pos));
         }
 
         Self {

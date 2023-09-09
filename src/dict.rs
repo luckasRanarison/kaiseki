@@ -6,7 +6,7 @@ use crate::{
 };
 use bincode::{decode_from_slice, Decode, Encode};
 
-const DICT: &'static [u8] = include_bytes!("../bin/dict.bin");
+const DICT: &[u8] = include_bytes!("../bin/dict.bin");
 
 #[derive(Encode, Decode)]
 pub struct EntryDictionary {
