@@ -1,7 +1,6 @@
-use bincode::encode_into_std_write;
 use encoding_rs::EUC_JP;
 use fst::MapBuilder;
-use kaiseki::{config::BINCODE_CONFIG, error::Error, mecab::*, Feature};
+use kaiseki::{bincode::encode, error::Error, mecab::*, Feature};
 use std::{
     collections::{BTreeMap, HashMap},
     fs::{self, File},
@@ -92,7 +91,7 @@ fn build_dict(term_map: TermMap, feat_map: FeatMap) -> Result<(), Error> {
     let dict = EntryDictionary::new(terms, features);
     let mut handle = File::create("bin/dict.bin")?;
 
-    encode_into_std_write(dict, &mut handle, *BINCODE_CONFIG)?;
+    encode(dict, &mut handle)?;
 
     println!("dict.bin has been created ✓");
 
@@ -122,7 +121,7 @@ fn build_matrix() -> Result<(), Error> {
     let cost_matrix = CostMatrix::new(cost_matrix);
     let mut handle = File::create("bin/matrix.bin")?;
 
-    encode_into_std_write(cost_matrix, &mut handle, *BINCODE_CONFIG)?;
+    encode(cost_matrix, &mut handle)?;
 
     println!("matrix.bin has been created ✓");
 
@@ -169,7 +168,7 @@ fn build_char_def() -> Result<(), Error> {
     let char_table = CharTable::new(char_category_map);
     let mut handle = File::create("bin/char.bin")?;
 
-    encode_into_std_write(char_table, &mut handle, *BINCODE_CONFIG)?;
+    encode(char_table, &mut handle)?;
 
     println!("char.bin has been created ✓");
 
@@ -198,7 +197,7 @@ fn build_unk() -> Result<(), Error> {
     let unk_dict = UnknownDictionary::new(unk_term_map, feature);
     let mut handle = File::create("bin/unk.bin")?;
 
-    encode_into_std_write(unk_dict, &mut handle, *BINCODE_CONFIG)?;
+    encode(unk_dict, &mut handle)?;
 
     println!("unk.bin has been created ✓");
 

@@ -1,10 +1,10 @@
 use crate::{
+    bincode::decode_slice,
     error::Error,
     feature::Feature,
     term::{Term, TermId},
-    utils::BINCODE_CONFIG,
 };
-use bincode::{decode_from_slice, Decode, Encode};
+use bincode::{Decode, Encode};
 
 const DICT: &[u8] = include_bytes!("../bin/dict.bin");
 
@@ -20,9 +20,7 @@ impl EntryDictionary {
     }
 
     pub fn load() -> Result<Self, Error> {
-        let (dict, _) = decode_from_slice(DICT, *BINCODE_CONFIG)?;
-
-        Ok(dict)
+        decode_slice(DICT)
     }
 
     pub fn get_term(&self, id: TermId) -> Option<&Term> {

@@ -1,5 +1,5 @@
-use crate::{error::Error, utils::BINCODE_CONFIG};
-use bincode::{decode_from_slice, Decode, Encode};
+use crate::{bincode::decode_slice, error::Error};
+use bincode::{Decode, Encode};
 
 const CHAR_DEF: &[u8] = include_bytes!("../bin/char.bin");
 
@@ -14,9 +14,7 @@ impl CharTable {
     }
 
     pub fn load() -> Result<Self, Error> {
-        let (char_def, _) = decode_from_slice(CHAR_DEF, *BINCODE_CONFIG)?;
-
-        Ok(char_def)
+        decode_slice(CHAR_DEF)
     }
 
     pub fn lookup(&self, character: char) -> &Vec<CharCategory> {

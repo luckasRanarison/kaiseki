@@ -1,5 +1,5 @@
-use crate::{error::Error, utils::BINCODE_CONFIG};
-use bincode::{decode_from_slice, Decode, Encode};
+use crate::{bincode::decode_slice, error::Error};
+use bincode::{Decode, Encode};
 
 const COST_MATRIX: &[u8] = include_bytes!("../bin/matrix.bin");
 
@@ -14,9 +14,7 @@ impl CostMatrix {
     }
 
     pub fn load() -> Result<Self, Error> {
-        let (matrix, _) = decode_from_slice(COST_MATRIX, *BINCODE_CONFIG)?;
-
-        Ok(matrix)
+        decode_slice(COST_MATRIX)
     }
 
     pub fn get(&self, right_id: u16, left_id: u16) -> i16 {

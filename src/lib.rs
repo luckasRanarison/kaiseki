@@ -10,14 +10,9 @@ mod row;
 mod term;
 mod tokenizer;
 mod unk;
-mod utils;
 
+pub mod bincode;
 pub mod error;
-pub use conjugation::*;
-pub use feature::*;
-pub use pos::*;
-pub use tokenizer::*;
-
 pub mod mecab {
     pub use crate::char::*;
     pub use crate::dict::*;
@@ -27,6 +22,7 @@ pub mod mecab {
     pub use crate::unk::*;
 }
 
-pub mod config {
-    pub use crate::utils::BINCODE_CONFIG;
-}
+pub use conjugation::*;
+pub use feature::*;
+pub use pos::*;
+pub use tokenizer::*;

@@ -1,10 +1,10 @@
 use crate::{
+    bincode::decode_slice,
     error::Error,
     feature::Feature,
     term::{Term, TermId},
-    utils::BINCODE_CONFIG,
 };
-use bincode::{decode_from_slice, Decode, Encode};
+use bincode::{Decode, Encode};
 use std::collections::HashMap;
 
 const UNK: &[u8] = include_bytes!("../bin/unk.bin");
@@ -25,9 +25,7 @@ impl UnknownDictionary {
 
 impl UnknownDictionary {
     pub fn load() -> Result<Self, Error> {
-        let (unk_dict, _) = decode_from_slice(UNK, *BINCODE_CONFIG)?;
-
-        Ok(unk_dict)
+        decode_slice(UNK)
     }
 
     pub fn get_terms(&self, key: &str) -> Option<&Vec<(TermId, Term)>> {
