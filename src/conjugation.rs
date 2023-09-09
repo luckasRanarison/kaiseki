@@ -1,35 +1,236 @@
+use std::fmt::Display;
+
 use bincode::{Decode, Encode};
 
-#[derive(Debug, Clone, PartialEq,  Encode, Decode)]
-pub enum ConjugationForm {
-    ClassicalBasicForm,          // 文語基本形
-    IrrealisForm,                // 未然形
-    ImperativeE,                 // 命令ｅ
-    ImperativeYo,                // 命令ｙｏ
-    ContinuativeDeConnection,    // 連用デ接続
-    ContinuativeForm,            // 連用形
-    NounConnection,              // 体言接続
-    BasicForm,                   // 基本形
-    ContinuativeTaConnection,    // 連用タ接続
-    HypotheticalContraction1,    // 仮定縮約１
-    NounConnectionSpecial,       // 体言接続特殊
-    NounConnectionSpecial2,      // 体言接続特殊２
-    ImperativeI,                 // 命令ｉ
-    GalConnection,               // ガル接続
-    IrrealisRelConnection,       // 未然レル接続
-    IrrealisUConnection,         // 未然ウ接続
-    ModernBasicForm,             // 現代基本形
-    ContinuativeNiConnection,    // 連用ニ接続
-    SoundChangeBasicForm,        // 音便基本形
-    ImperativeRo,                // 命令ｒｏ
-    IrrealisNuConnection,        // 未然ヌ接続
-    ContinuativeTeConnection,    // 連用テ接続
-    ContinuativeGozaiConnection, // 連用ゴザイ接続
-    HypotheticalForm,            // 仮定形
-    BasicFormWithSokuonben,      // 基本形-促音便
-    HypotheticalContraction2,    // 仮定縮約２
-    IrrealisSpecial,             // 未然特殊
+#[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
+pub enum ConjugationType {
+    #[default]
     Unknown,
+    BungoKeri,
+    IchidanEru,
+    SpecialDesu,
+    GodanRaRow,
+    SpecialDa,
+    IrregularSuru,
+    AdjectiveIi,
+    NidanTaRow,
+    IchidanKureru,
+    NidanHaRow,
+    NidanGaRow,
+    GodanNaRow,
+    SpecialTai,
+    GodanKaRowSokuonben,
+    YondanHaRow,
+    GodanSaRow,
+    GodanRaRowSpecial,
+    BungoKi,
+    Placeholder,
+    GodanTaRow,
+    KakanKuru,
+    SpecialMasu,
+    Invariable,
+    NidanMaRow,
+    YondanSaRow,
+    IrregularSuru2,
+    BungoRu,
+    YondanBaRow,
+    GodanMaRow,
+    NidanToku,
+    BungoNari,
+    GodanBaRow,
+    BungoGotoshi,
+    AdjectiveI,
+    Ichidan,
+    GodanKaRowSokuonbenYuku,
+    YondanTaRow,
+    SpecialNu,
+    AdjectiveAuo,
+    GodanRaRowAru,
+    GodanKaRowIOnbin,
+    BungoMaji,
+    SpecialYa,
+    GodanWaRowUOnbin,
+    JodanHaRow,
+    JodanDaRow,
+    GodanWaRowSokuonben,
+    SpecialNai,
+    IrregularZuru,
+    NidanKaRow,
+    NidanDaRow,
+    BungoBeshi,
+    KakanKuru2,
+    Rahan,
+    SpecialJa,
+    BungoRi,
+    SpecialTa,
+    GodanGaRow,
+}
+
+impl From<&str> for ConjugationType {
+    fn from(s: &str) -> Self {
+        match s {
+            "文語・ケリ" => Self::BungoKeri,
+            "一段・得ル" => Self::IchidanEru,
+            "特殊・デス" => Self::SpecialDesu,
+            "五段・ラ行" => Self::GodanRaRow,
+            "特殊・ダ" => Self::SpecialDa,
+            "サ変・スル" => Self::IrregularSuru,
+            "形容詞・イイ" => Self::AdjectiveIi,
+            "下二・タ行" => Self::NidanTaRow,
+            "一段・クレル" => Self::IchidanKureru,
+            "下二・ハ行" => Self::NidanHaRow,
+            "下二・ガ行" => Self::NidanGaRow,
+            "五段・ナ行" => Self::GodanNaRow,
+            "特殊・タイ" => Self::SpecialTai,
+            "五段・カ行促音便" => Self::GodanKaRowSokuonben,
+            "四段・ハ行" => Self::YondanHaRow,
+            "五段・サ行" => Self::GodanSaRow,
+            "五段・ラ行特殊" => Self::GodanRaRowSpecial,
+            "文語・キ" => Self::BungoKi,
+            "*" => Self::Placeholder,
+            "五段・タ行" => Self::GodanTaRow,
+            "カ変・クル" => Self::KakanKuru,
+            "特殊・マス" => Self::SpecialMasu,
+            "不変化型" => Self::Invariable,
+            "下二・マ行" => Self::NidanMaRow,
+            "四段・サ行" => Self::YondanSaRow,
+            "サ変・－スル" => Self::IrregularSuru2,
+            "文語・ル" => Self::BungoRu,
+            "四段・バ行" => Self::YondanBaRow,
+            "五段・マ行" => Self::GodanMaRow,
+            "下二・得" => Self::NidanToku,
+            "文語・ナリ" => Self::BungoNari,
+            "五段・バ行" => Self::GodanBaRow,
+            "文語・ゴトシ" => Self::BungoGotoshi,
+            "形容詞・イ段" => Self::AdjectiveI,
+            "一段" => Self::Ichidan,
+            "五段・カ行促音便ユク" => Self::GodanKaRowSokuonbenYuku,
+            "四段・タ行" => Self::YondanTaRow,
+            "特殊・ヌ" => Self::SpecialNu,
+            "形容詞・アウオ段" => Self::AdjectiveAuo,
+            "五段・ラ行アル" => Self::GodanRaRowAru,
+            "五段・カ行イ音便" => Self::GodanKaRowIOnbin,
+            "文語・マジ" => Self::BungoMaji,
+            "特殊・ヤ" => Self::SpecialYa,
+            "五段・ワ行ウ音便" => Self::GodanWaRowUOnbin,
+            "上二・ハ行" => Self::JodanHaRow,
+            "上二・ダ行" => Self::JodanDaRow,
+            "五段・ワ行促音便" => Self::GodanWaRowSokuonben,
+            "特殊・ナイ" => Self::SpecialNai,
+            "サ変・－ズル" => Self::IrregularZuru,
+            "下二・カ行" => Self::NidanKaRow,
+            "下二・ダ行" => Self::NidanDaRow,
+            "文語・ベシ" => Self::BungoBeshi,
+            "カ変・来ル" => Self::KakanKuru2,
+            "ラ変" => Self::Rahan,
+            "特殊・ジャ" => Self::SpecialJa,
+            "文語・リ" => Self::BungoRi,
+            "特殊・タ" => Self::SpecialTa,
+            "五段・ガ行" => Self::GodanGaRow,
+            _ => Self::Unknown,
+        }
+    }
+}
+
+impl Display for ConjugationType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::BungoKeri => "文語・ケリ",
+            Self::IchidanEru => "一段・得ル",
+            Self::SpecialDesu => "特殊・デス",
+            Self::GodanRaRow => "五段・ラ行",
+            Self::SpecialDa => "特殊・ダ",
+            Self::IrregularSuru => "サ変・スル",
+            Self::AdjectiveIi => "形容詞・イイ",
+            Self::NidanTaRow => "下二・タ行",
+            Self::IchidanKureru => "一段・クレル",
+            Self::NidanHaRow => "下二・ハ行",
+            Self::NidanGaRow => "下二・ガ行",
+            Self::GodanNaRow => "五段・ナ行",
+            Self::SpecialTai => "特殊・タイ",
+            Self::GodanKaRowSokuonben => "五段・カ行促音便",
+            Self::YondanHaRow => "四段・ハ行",
+            Self::GodanSaRow => "五段・サ行",
+            Self::GodanRaRowSpecial => "五段・ラ行特殊",
+            Self::BungoKi => "文語・キ",
+            Self::Placeholder => "*",
+            Self::GodanTaRow => "五段・タ行",
+            Self::KakanKuru => "カ変・クル",
+            Self::SpecialMasu => "特殊・マス",
+            Self::Invariable => "不変化型",
+            Self::NidanMaRow => "下二・マ行",
+            Self::YondanSaRow => "四段・サ行",
+            Self::IrregularSuru2 => "サ変・－スル",
+            Self::BungoRu => "文語・ル",
+            Self::YondanBaRow => "四段・バ行",
+            Self::GodanMaRow => "五段・マ行",
+            Self::NidanToku => "下二・得",
+            Self::BungoNari => "文語・ナリ",
+            Self::GodanBaRow => "五段・バ行",
+            Self::BungoGotoshi => "文語・ゴトシ",
+            Self::AdjectiveI => "形容詞・イ段",
+            Self::Ichidan => "一段",
+            Self::GodanKaRowSokuonbenYuku => "五段・カ行促音便ユク",
+            Self::YondanTaRow => "四段・タ行",
+            Self::SpecialNu => "特殊・ヌ",
+            Self::AdjectiveAuo => "形容詞・アウオ段",
+            Self::GodanRaRowAru => "五段・ラ行アル",
+            Self::GodanKaRowIOnbin => "五段・カ行イ音便",
+            Self::BungoMaji => "文語・マジ",
+            Self::SpecialYa => "特殊・ヤ",
+            Self::GodanWaRowUOnbin => "五段・ワ行ウ音便",
+            Self::JodanHaRow => "上二・ハ行",
+            Self::JodanDaRow => "上二・ダ行",
+            Self::GodanWaRowSokuonben => "五段・ワ行促音便",
+            Self::SpecialNai => "特殊・ナイ",
+            Self::IrregularZuru => "サ変・－ズル",
+            Self::NidanKaRow => "下二・カ行",
+            Self::NidanDaRow => "下二・ダ行",
+            Self::BungoBeshi => "文語・ベシ",
+            Self::KakanKuru2 => "カ変・来ル",
+            Self::Rahan => "ラ変",
+            Self::SpecialJa => "特殊・ジャ",
+            Self::BungoRi => "文語・リ",
+            Self::SpecialTa => "特殊・タ",
+            Self::GodanGaRow => "五段・ガ行",
+            Self::Unknown => "未知",
+        };
+
+        write!(f, "{}", s)
+    }
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
+pub enum ConjugationForm {
+    #[default]
+    Unknown,
+    ClassicalBasicForm,
+    IrrealisForm,
+    ImperativeE,
+    ImperativeYo,
+    ContinuativeDeConnection,
+    ContinuativeForm,
+    NounConnection,
+    BasicForm,
+    ContinuativeTaConnection,
+    HypotheticalContraction1,
+    NounConnectionSpecial,
+    NounConnectionSpecial2,
+    ImperativeI,
+    GalConnection,
+    IrrealisRelConnection,
+    IrrealisUConnection,
+    ModernBasicForm,
+    ContinuativeNiConnection,
+    SoundChangeBasicForm,
+    ImperativeRo,
+    IrrealisNuConnection,
+    ContinuativeTeConnection,
+    ContinuativeGozaiConnection,
+    HypotheticalForm,
+    BasicFormWithSokuonben,
+    HypotheticalContraction2,
+    IrrealisSpecial,
 }
 
 impl From<&str> for ConjugationForm {
@@ -67,9 +268,9 @@ impl From<&str> for ConjugationForm {
     }
 }
 
-impl ToString for ConjugationForm {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for ConjugationForm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
             Self::ClassicalBasicForm => "文語基本形",
             Self::IrrealisForm => "未然形",
             Self::ImperativeE => "命令ｅ",
@@ -98,7 +299,8 @@ impl ToString for ConjugationForm {
             Self::HypotheticalContraction2 => "仮定縮約２",
             Self::IrrealisSpecial => "未然特殊",
             Self::Unknown => "未知",
-        }
-        .to_owned()
+        };
+
+        write!(f, "{}", s)
     }
 }

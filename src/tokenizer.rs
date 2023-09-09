@@ -153,7 +153,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, Error> {
 mod tests {
     use super::Tokenizer;
     use crate::conjugation::ConjugationForm as C;
-    use crate::pos::PartOfSpeech as P;
+    use crate::pos::{PosMain as P, PosSub as S};
 
     #[test]
     fn test_tokenizer() {
@@ -181,15 +181,15 @@ mod tests {
         let tokens = tokenizer.tokenize("ケーキを食べる");
 
         let feat = &tokens[0].feature;
-        assert!(feat.part_of_speech.contains(&P::Noun));
+        assert_eq!(feat.main_pos, P::Noun);
         assert_eq!(Some("ケーキ".to_owned()), feat.reading);
 
         let feat = &tokens[1].feature;
-        assert!(feat.part_of_speech.contains(&P::Particle));
+        assert_eq!(feat.main_pos, P::Particle);
         assert_eq!(Some("ヲ".to_owned()), feat.reading);
 
         let feat = &tokens[2].feature;
-        assert!(feat.part_of_speech.contains(&P::Verb));
+        assert_eq!(feat.main_pos, P::Verb);
         assert_eq!(Some(C::BasicForm), feat.conjugation_form);
         assert_eq!(Some("タベル".to_owned()), feat.reading);
     }
@@ -200,9 +200,9 @@ mod tests {
         let tokens = tokenizer.tokenize("100 ");
 
         let feat = &tokens[0].feature;
-        assert!(feat.part_of_speech.contains(&P::Number));
+        assert!(feat.sub_pos.contains(&S::Number));
 
         let feat = &tokens[1].feature;
-        assert!(feat.part_of_speech.contains(&P::Space));
+        assert!(feat.sub_pos.contains(&S::Space));
     }
 }
