@@ -1,7 +1,7 @@
 use bincode::encode_into_std_write;
 use encoding_rs::EUC_JP;
 use fst::MapBuilder;
-use kaiseki::{build::*, error::Error, Feature};
+use kaiseki::{config::BINCODE_CONFIG, error::Error, mecab::*, Feature};
 use std::{
     collections::{BTreeMap, HashMap},
     fs::{self, File},
@@ -11,7 +11,7 @@ use std::{
 type TermMap = BTreeMap<String, Vec<Term>>;
 type FeatMap = BTreeMap<String, Vec<Feature>>;
 
-pub fn get_entry_map() -> Result<(TermMap, FeatMap), Error> {
+fn get_entry_map() -> Result<(TermMap, FeatMap), Error> {
     println!("> Decoding mecab IPA dictionary files...");
 
     let mut decoded_files = Vec::new();
@@ -46,7 +46,7 @@ pub fn get_entry_map() -> Result<(TermMap, FeatMap), Error> {
     Ok((term_map, feat_map))
 }
 
-pub fn read_mecab_file(filename: &str) -> Result<String, Error> {
+fn read_mecab_file(filename: &str) -> Result<String, Error> {
     let path = Path::new("mecab").join(filename);
     let bytes = fs::read(path)?;
     let (buffer, _, _) = EUC_JP.decode(&bytes);
@@ -54,7 +54,7 @@ pub fn read_mecab_file(filename: &str) -> Result<String, Error> {
     Ok(buffer.to_string())
 }
 
-pub fn build_fst(term_map: &TermMap) -> Result<(), Error> {
+fn build_fst(term_map: &TermMap) -> Result<(), Error> {
     println!("> Building FST...");
 
     let handle = File::create("bin/term.fst")?;
@@ -75,43 +75,31 @@ pub fn build_fst(term_map: &TermMap) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn build_term(term_map: &TermMap) -> Result<(), Error> {
-    println!("> Building term values...");
+fn build_dict(term_map: TermMap, feat_map: FeatMap) -> Result<(), Error> {
+    println!("> Building entry dictionary...");
 
-    let mut term_values = Vec::new();
+    let mut terms = Vec::new();
+    let mut features = Vec::new();
 
     for value in term_map.values() {
-        term_values.extend(value.clone());
+        terms.extend(value.clone());
     }
-
-    let mut handle = File::create("bin/term.bin")?;
-
-    encode_into_std_write(term_values, &mut handle, *BINCODE_CONFIG)?;
-
-    println!("term.bin has been created ✓");
-
-    Ok(())
-}
-
-pub fn build_feature(feat_map: FeatMap) -> Result<(), Error> {
-    println!("> Building feature...");
-
-    let mut feat_values = Vec::new();
 
     for value in feat_map.values() {
-        feat_values.extend(value.clone());
+        features.extend(value.clone());
     }
 
-    let mut handle = File::create("bin/feature.bin")?;
+    let dict = EntryDictionary::new(terms, features);
+    let mut handle = File::create("bin/dict.bin")?;
 
-    encode_into_std_write(feat_values, &mut handle, *BINCODE_CONFIG)?;
+    encode_into_std_write(dict, &mut handle, *BINCODE_CONFIG)?;
 
-    println!("feature.bin has been created ✓");
+    println!("dict.bin has been created ✓");
 
     Ok(())
 }
 
-pub fn build_matrix() -> Result<(), Error> {
+fn build_matrix() -> Result<(), Error> {
     println!("> Building cost matrix...");
 
     let buffer = read_mecab_file("matrix.def")?;
@@ -131,6 +119,7 @@ pub fn build_matrix() -> Result<(), Error> {
         cost_matrix[right_id][left_id] = cost;
     }
 
+    let cost_matrix = CostMatrix::new(cost_matrix);
     let mut handle = File::create("bin/matrix.bin")?;
 
     encode_into_std_write(cost_matrix, &mut handle, *BINCODE_CONFIG)?;
@@ -140,7 +129,7 @@ pub fn build_matrix() -> Result<(), Error> {
     Ok(())
 }
 
-pub fn build_char_def() -> Result<(), Error> {
+fn build_char_def() -> Result<(), Error> {
     println!("> Buiding char definition..");
 
     let buffer = read_mecab_file("char.def")?;
@@ -187,7 +176,7 @@ pub fn build_char_def() -> Result<(), Error> {
     Ok(())
 }
 
-pub fn build_unk() -> Result<(), Error> {
+fn build_unk() -> Result<(), Error> {
     println!("> Building unknown dictionary...");
 
     let buffer = read_mecab_file("unk.def")?;
@@ -297,8 +286,7 @@ fn main() -> Result<(), Error> {
     build_unk()?;
     build_matrix()?;
     build_fst(&term_map)?;
-    build_term(&term_map)?;
-    build_feature(feat_map)?;
+    build_dict(term_map, feat_map)?;
 
     println!("\nBuild complete!");
 

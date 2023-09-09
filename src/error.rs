@@ -1,7 +1,7 @@
 use bincode::error::{DecodeError, EncodeError};
 use std::{fmt, io, num::ParseIntError};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Error {
     IOError(io::Error),
     EncodeError(EncodeError),

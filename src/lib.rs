@@ -18,11 +18,15 @@ pub use feature::*;
 pub use pos::*;
 pub use tokenizer::*;
 
-pub mod build {
+pub mod mecab {
     pub use crate::char::*;
-    pub use crate::dict::EntryDictionary;
-    pub use crate::row::Row;
-    pub use crate::term::Term;
-    pub use crate::unk::UnknownDictionary;
+    pub use crate::dict::*;
+    pub use crate::matrix::*;
+    pub use crate::row::*;
+    pub use crate::term::*;
+    pub use crate::unk::*;
+}
+
+pub mod config {
     pub use crate::utils::BINCODE_CONFIG;
 }

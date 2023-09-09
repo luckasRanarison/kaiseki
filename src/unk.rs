@@ -11,7 +11,7 @@ const UNK: &'static [u8] = include_bytes!("../bin/unk.bin");
 
 type TermMap = HashMap<String, Vec<(TermId, Term)>>;
 
-#[derive(Debug, Encode, Decode)]
+#[derive(Encode, Decode)]
 pub struct UnknownDictionary {
     terms: TermMap,
     feature: Vec<Feature>,

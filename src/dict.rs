@@ -4,22 +4,25 @@ use crate::{
     term::{Term, TermId},
     utils::BINCODE_CONFIG,
 };
-use bincode::decode_from_slice;
+use bincode::{decode_from_slice, Decode, Encode};
 
-const TERMS: &'static [u8] = include_bytes!("../bin/term.bin");
-const FEATURES: &'static [u8] = include_bytes!("../bin/feature.bin");
+const DICT: &'static [u8] = include_bytes!("../bin/dict.bin");
 
+#[derive(Encode, Decode)]
 pub struct EntryDictionary {
     terms: Vec<Term>,
     features: Vec<Feature>,
 }
 
 impl EntryDictionary {
-    pub fn load() -> Result<Self, Error> {
-        let (terms, _) = decode_from_slice(TERMS, *BINCODE_CONFIG)?;
-        let (features, _) = decode_from_slice(FEATURES, *BINCODE_CONFIG)?;
+    pub fn new(terms: Vec<Term>, features: Vec<Feature>) -> Self {
+        Self { terms, features }
+    }
 
-        Ok(Self { terms, features })
+    pub fn load() -> Result<Self, Error> {
+        let (dict, _) = decode_from_slice(DICT, *BINCODE_CONFIG)?;
+
+        Ok(dict)
     }
 
     pub fn get_term(&self, id: TermId) -> Option<&Term> {
