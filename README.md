@@ -10,6 +10,7 @@ kaiseki currently only supports morpheme tokenization and provides additional in
 use kaiseki::{Tokenizer, error:Error};
 
 fn main() -> Result<(), Error> {
+    let tokenizer = Tokenizer::new()?;
     let tokens = tokenizer.tokenize("東京都に住む");
     let morphemes: Vec<_> = tokens.iter().map(|token| &token.text).collect();
 
