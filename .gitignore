@@ -1,0 +1,3 @@
+target
+mecab/**
+!mecab/.keep
