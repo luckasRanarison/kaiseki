@@ -1,6 +1,6 @@
 # kaiseki
 
-kaiseki (解析) is a japanese tokenizer and morphological analyzer using [mecab-ipadic](https://taku910.github.io/mecab/), inspired by [this article](https://towardsdatascience.com/how-japanese-tokenizers-work-87ab6b256984) and [kuromoji-rs](https://github.com/fulmicoton/kuromoji-rs).
+kaiseki (解析) is a japanese tokenizer and morphological analyzer using [mecab-ipadic](https://taku910.github.io/mecab/), insipired by [this article](https://towardsdatascience.com/how-japanese-tokenizers-work-87ab6b256984).
 
 ## Usage
 
@@ -21,13 +21,26 @@ fn main() -> Result<(), Error> {
 
 ```
 
-# Build
-
-kaiseki uses pre-compiled binary files, contaning informations extracted from mecab-ipadic.
-
-You can build the binaries with the following commands:
+## Test 
 
 ```sh
-sh ipadic-install.sh
-cargo run --bin kaiseki-build
+cargo test
 ```
+
+## Credits
+
+- The [Mecab Project](https://taku910.github.io/mecab/) for providing the the dictionary and data used for tokenizing.
+ 
+- [kotori](https://github.com/wanasit/kotori) and [kuromoji-rs](https://github.com/fulmicoton/kuromoji-rs) for some reference. 
+
+## Articles
+
+- [How Japanese Tokenizers Work](https://towardsdatascience.com/how-japanese-tokenizers-work-87ab6b256984).
+
+- [日本語形態素解析の裏側を覗く！MeCab はどのように形態素解析しているか](https://techlife.cookpad.com/entry/2016/05/11/170000).
+
+## License
+
+MIT License.
+
+
