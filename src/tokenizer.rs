@@ -1,3 +1,5 @@
+use std::iter;
+
 use crate::{
     char::CharTable,
     dict::EntryDictionary,
@@ -6,8 +8,10 @@ use crate::{
     lattice::{Lattice, Node},
     matrix::CostMatrix,
     morpheme::Morpheme,
+    pos::PartOfSpeech as Pos,
     term::ExtratedTerm,
     unk::UnknownDictionary,
+    word::{PartOfSpeechWord as PosWord, Word},
 };
 
 pub struct Tokenizer {
@@ -78,6 +82,22 @@ impl Tokenizer {
         tokens
     }
 
+    pub fn tokenize_word(&self, input: &str) -> Vec<Word> {
+        let morphemes = self.tokenize(input);
+        let mut morphemes = morphemes.iter().peekable();
+
+        while let Some(morpheme) = morphemes.next() {
+            let mut current = vec![morpheme];
+
+            if morpheme.is_verb() {
+                let taken = iter::from_fn(|| morphemes.next_if(|m| m.is_inflection()));
+                let inflections: Vec<_> = taken.collect();
+            }
+        }
+
+        todo!()
+    }
+
     fn get_terms_from_str(&self, input: &str) -> Vec<ExtratedTerm> {
         let terms = self.fst.get_from_prefix(input);
         let mut extracted = Vec::new();
@@ -93,7 +113,7 @@ impl Tokenizer {
 
     fn get_unkown_terms_from_str(&self, input: &str, found: bool) -> Vec<ExtratedTerm> {
         let mut unk_terms = Vec::new();
-        let mut chars = input.chars().peekable();
+        let mut chars = input.chars();
         let mut current_len = 0;
         let ch = chars.next().unwrap();
         let char_categories = self.char_table.lookup(ch);

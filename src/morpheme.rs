@@ -25,4 +25,28 @@ impl Morpheme {
             reading: feature.reading,
         }
     }
+
+    pub fn is_verb(&self) -> bool {
+        matches!(self.part_of_speech, PartOfSpeech::Verb)
+    }
+
+    pub fn is_ni_verb(&self) -> bool {
+        self.is_verb()
+            && self
+                .sub_part_of_speech
+                .contains(&SubPartOfSpeech::NonIndependent)
+    }
+
+    pub fn is_conjunctive_particle(&self) -> bool {
+        self.sub_part_of_speech
+            .contains(&SubPartOfSpeech::ConjunctiveParticle)
+    }
+
+    pub fn is_auxiliary_verb(&self) -> bool {
+        matches!(self.part_of_speech, PartOfSpeech::AuxiliaryVerb)
+    }
+
+    pub fn is_inflection(&self) -> bool {
+        self.is_ni_verb() || self.is_auxiliary_verb() || self.is_conjunctive_particle()
+    }
 }

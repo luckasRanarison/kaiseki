@@ -11,6 +11,8 @@ mod row;
 mod term;
 mod tokenizer;
 mod unk;
+mod verb;
+mod word;
 
 pub mod bincode;
 pub mod error;
