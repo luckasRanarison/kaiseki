@@ -1,10 +1,8 @@
 use bincode::{Decode, Encode};
 use std::fmt;
 
-#[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
+#[derive(Debug, Clone, PartialEq, Encode, Decode)]
 pub enum ConjugationType {
-    #[default]
-    Unknown,
     BungoKeri,
     IchidanEru,
     SpecialDesu,
@@ -63,6 +61,7 @@ pub enum ConjugationType {
     BungoRi,
     SpecialTa,
     GodanGaRow,
+    Unknown,
 }
 
 impl From<&str> for ConjugationType {
@@ -199,10 +198,8 @@ impl fmt::Display for ConjugationType {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
+#[derive(Debug, Clone, PartialEq, Encode, Decode)]
 pub enum ConjugationForm {
-    #[default]
-    Unknown,
     ClassicalBasicForm,
     IrrealisForm,
     ImperativeE,
@@ -230,6 +227,7 @@ pub enum ConjugationForm {
     BasicFormWithSokuonben,
     HypotheticalContraction2,
     IrrealisSpecial,
+    Unknown,
 }
 
 impl From<&str> for ConjugationForm {

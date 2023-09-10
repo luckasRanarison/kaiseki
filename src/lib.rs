@@ -5,6 +5,7 @@ mod feature;
 mod fst;
 mod lattice;
 mod matrix;
+mod morpheme;
 mod pos;
 mod row;
 mod term;
@@ -24,5 +25,6 @@ pub mod mecab {
 
 pub use conjugation::*;
 pub use feature::*;
+pub use morpheme::*;
 pub use pos::*;
 pub use tokenizer::*;

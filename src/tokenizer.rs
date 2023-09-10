@@ -2,32 +2,13 @@ use crate::{
     char::CharTable,
     dict::EntryDictionary,
     error::Error,
-    feature::Feature,
     fst::FstSearcher,
     lattice::{Lattice, Node},
     matrix::CostMatrix,
+    morpheme::Morpheme,
     term::ExtratedTerm,
     unk::UnknownDictionary,
 };
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Token {
-    pub text: String,
-    pub start: usize,
-    pub end: usize,
-    pub feature: Feature,
-}
-
-impl Token {
-    pub fn new(text: String, start: usize, end: usize, feature: Feature) -> Self {
-        Self {
-            text,
-            start,
-            end,
-            feature,
-        }
-    }
-}
 
 pub struct Tokenizer {
     fst: FstSearcher,
@@ -48,7 +29,7 @@ impl Tokenizer {
         })
     }
 
-    pub fn tokenize(&self, input: &str) -> Vec<Token> {
+    pub fn tokenize(&self, input: &str) -> Vec<Morpheme> {
         let text_len = input.len();
         let mut lattice = Lattice::new(text_len);
 
@@ -91,7 +72,7 @@ impl Tokenizer {
             };
             let feature = feature.cloned().unwrap_or_default();
 
-            tokens.push(Token::new(text, node.start, end, feature));
+            tokens.push(Morpheme::new(text, node.start, end, feature));
         }
 
         tokens
@@ -145,7 +126,7 @@ impl Tokenizer {
     }
 }
 
-pub fn tokenize(input: &str) -> Result<Vec<Token>, Error> {
+pub fn tokenize(input: &str) -> Result<Vec<Morpheme>, Error> {
     Ok(Tokenizer::new()?.tokenize(input))
 }
 
@@ -153,14 +134,14 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, Error> {
 mod tests {
     use super::Tokenizer;
     use crate::conjugation::ConjugationForm as C;
-    use crate::pos::{PosMain as P, PosSub as S};
+    use crate::pos::{PartOfSpeech as P, SubPartOfSpeech as S};
 
     #[test]
     fn test_tokenizer() {
         let tokenizer = Tokenizer::new().unwrap();
-        let tokens = tokenizer.tokenize("東京都に住む");
+        let morphemes = tokenizer.tokenize("東京都に住む");
         let expected = vec!["東京", "都", "に", "住む"];
-        let text: Vec<_> = tokens.iter().map(|token| &token.text).collect();
+        let text: Vec<_> = morphemes.iter().map(|token| &token.text).collect();
 
         assert_eq!(expected, text);
     }
@@ -168,9 +149,9 @@ mod tests {
     #[test]
     fn test_tokenizer_unkown() {
         let tokenizer = Tokenizer::new().unwrap();
-        let tokens = tokenizer.tokenize("1234個");
+        let morphemes = tokenizer.tokenize("1234個");
         let expected = vec!["1234", "個"];
-        let text: Vec<_> = tokens.iter().map(|token| &token.text).collect();
+        let text: Vec<_> = morphemes.iter().map(|token| &token.text).collect();
 
         assert_eq!(expected, text);
     }
@@ -178,31 +159,25 @@ mod tests {
     #[test]
     fn test_token_feature() {
         let tokenizer = Tokenizer::new().unwrap();
-        let tokens = tokenizer.tokenize("ケーキを食べる");
+        let morphemes = tokenizer.tokenize("ケーキを食べる");
 
-        let feat = &tokens[0].feature;
-        assert_eq!(feat.main_pos, P::Noun);
-        assert_eq!(Some("ケーキ".to_owned()), feat.reading);
+        assert_eq!(morphemes[0].part_of_speech, P::Noun);
+        assert_eq!(Some("ケーキ".to_owned()), morphemes[0].reading);
 
-        let feat = &tokens[1].feature;
-        assert_eq!(feat.main_pos, P::Particle);
-        assert_eq!(Some("ヲ".to_owned()), feat.reading);
+        assert_eq!(morphemes[1].part_of_speech, P::Particle);
+        assert_eq!(Some("ヲ".to_owned()), morphemes[1].reading);
 
-        let feat = &tokens[2].feature;
-        assert_eq!(feat.main_pos, P::Verb);
-        assert_eq!(Some(C::BasicForm), feat.conjugation_form);
-        assert_eq!(Some("タベル".to_owned()), feat.reading);
+        assert_eq!(morphemes[2].part_of_speech, P::Verb);
+        assert_eq!(Some(C::BasicForm), morphemes[2].conjugation_form);
+        assert_eq!(Some("タベル".to_owned()), morphemes[2].reading);
     }
 
     #[test]
     fn test_token_feature_unknown() {
         let tokenizer = Tokenizer::new().unwrap();
-        let tokens = tokenizer.tokenize("100 ");
+        let morphemes = tokenizer.tokenize("100 ");
 
-        let feat = &tokens[0].feature;
-        assert!(feat.sub_pos.contains(&S::Number));
-
-        let feat = &tokens[1].feature;
-        assert!(feat.sub_pos.contains(&S::Space));
+        assert!(morphemes[0].sub_part_of_speech.contains(&S::Number));
+        assert!(morphemes[1].sub_part_of_speech.contains(&S::Space));
     }
 }

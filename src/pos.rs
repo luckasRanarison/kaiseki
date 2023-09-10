@@ -1,10 +1,8 @@
 use bincode::{Decode, Encode};
 use std::fmt;
 
-#[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
-pub enum PosMain {
-    #[default]
-    Other,
+#[derive(Debug, Clone, PartialEq, Encode, Decode)]
+pub enum PartOfSpeech {
     Noun,
     Verb,
     AuxiliaryVerb,
@@ -17,9 +15,16 @@ pub enum PosMain {
     Filler,
     Interjection,
     Symbol,
+    Other,
 }
 
-impl From<&str> for PosMain {
+impl Default for PartOfSpeech {
+    fn default() -> Self {
+        Self::Other
+    }
+}
+
+impl From<&str> for PartOfSpeech {
     fn from(value: &str) -> Self {
         match value {
             "名詞" => Self::Noun,
@@ -39,7 +44,7 @@ impl From<&str> for PosMain {
     }
 }
 
-impl fmt::Display for PosMain {
+impl fmt::Display for PartOfSpeech {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match self {
             Self::Noun => "名詞",
@@ -61,10 +66,8 @@ impl fmt::Display for PosMain {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Encode, Decode)]
-pub enum PosSub {
-    #[default]
-    Other,
+#[derive(Debug, Clone, PartialEq, Encode, Decode)]
+pub enum SubPartOfSpeech {
     General,
     ProperNoun,
     AdverbialParticle,
@@ -112,9 +115,10 @@ pub enum PosSub {
     SuruVerbConnection,
     SentenceEndingMark,
     Interjection,
+    Other,
 }
 
-impl From<&str> for PosSub {
+impl From<&str> for SubPartOfSpeech {
     fn from(value: &str) -> Self {
         match value {
             "一般" => Self::General,
@@ -169,7 +173,7 @@ impl From<&str> for PosSub {
     }
 }
 
-impl fmt::Display for PosSub {
+impl fmt::Display for SubPartOfSpeech {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let s = match self {
             Self::General => "一般",
