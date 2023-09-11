@@ -9,6 +9,7 @@ pub struct Morpheme {
     pub sub_part_of_speech: Vec<SubPartOfSpeech>,
     pub conjugation_type: Option<ConjugationType>,
     pub conjugation_form: Option<ConjugationForm>,
+    pub base_form: Option<String>,
     pub reading: Option<String>,
 }
 
@@ -22,31 +23,36 @@ impl Morpheme {
             sub_part_of_speech: feature.sub_part_of_speech,
             conjugation_type: feature.conjugation_type,
             conjugation_form: feature.conjugation_form,
+            base_form: feature.base_form,
             reading: feature.reading,
         }
+    }
+
+    pub fn has_sub_pos(&self, pos: &SubPartOfSpeech) -> bool {
+        self.sub_part_of_speech.contains(pos)
     }
 
     pub fn is_verb(&self) -> bool {
         matches!(self.part_of_speech, PartOfSpeech::Verb)
     }
 
-    pub fn is_ni_verb(&self) -> bool {
-        self.is_verb()
-            && self
-                .sub_part_of_speech
-                .contains(&SubPartOfSpeech::NonIndependent)
-    }
-
-    pub fn is_conjunctive_particle(&self) -> bool {
-        self.sub_part_of_speech
-            .contains(&SubPartOfSpeech::ConjunctiveParticle)
-    }
-
-    pub fn is_auxiliary_verb(&self) -> bool {
-        matches!(self.part_of_speech, PartOfSpeech::AuxiliaryVerb)
-    }
-
     pub fn is_inflection(&self) -> bool {
-        self.is_ni_verb() || self.is_auxiliary_verb() || self.is_conjunctive_particle()
+        self.is_ni_verb() || self.is_aux_verb() || self.is_te() || self.is_ba()
+    }
+
+    fn is_ni_verb(&self) -> bool {
+        self.is_verb() && self.has_sub_pos(&SubPartOfSpeech::NonIndependent)
+    }
+
+    fn is_te(&self) -> bool {
+        self.text == "て" && self.has_sub_pos(&SubPartOfSpeech::ConjunctiveParticle)
+    }
+
+    fn is_ba(&self) -> bool {
+        self.text == "ば" && self.has_sub_pos(&SubPartOfSpeech::ConjunctiveParticle)
+    }
+
+    fn is_aux_verb(&self) -> bool {
+        matches!(self.part_of_speech, PartOfSpeech::AuxiliaryVerb)
     }
 }
