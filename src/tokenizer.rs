@@ -1,5 +1,3 @@
-use std::iter;
-
 use crate::{
     char::CharTable,
     dict::EntryDictionary,
@@ -8,10 +6,9 @@ use crate::{
     lattice::{Lattice, Node},
     matrix::CostMatrix,
     morpheme::Morpheme,
-    pos::PartOfSpeech as Pos,
     term::ExtratedTerm,
     unk::UnknownDictionary,
-    word::{PartOfSpeechWord as PosWord, Word},
+    word::Word,
 };
 
 pub struct Tokenizer {
@@ -83,19 +80,36 @@ impl Tokenizer {
     }
 
     pub fn tokenize_word(&self, input: &str) -> Vec<Word> {
-        let morphemes = self.tokenize(input);
-        let mut morphemes = morphemes.iter().peekable();
+        let mut words = Vec::new();
+        let mut morphemes = self.tokenize(input).into_iter().peekable();
 
         while let Some(morpheme) = morphemes.next() {
-            let mut current = vec![morpheme];
+            if morpheme.is_symbol() {
+                continue;
+            }
 
-            if morpheme.is_verb() {
-                let taken = iter::from_fn(|| morphemes.next_if(|m| m.is_inflection()));
-                let inflections: Vec<_> = taken.collect();
+            let has_inflections = morpheme.is_verb() || morpheme.is_adjective();
+            let mut word_morphemes = vec![morpheme];
+
+            if has_inflections {
+                while let Some(next) = morphemes.peek() {
+                    if next.is_inflection() {
+                        word_morphemes.push(next.to_owned());
+                        morphemes.next();
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            let word = Word::from_morphemes(word_morphemes.as_slice());
+
+            if let Some(word) = word {
+                words.push(word);
             }
         }
 
-        todo!()
+        words
     }
 
     fn get_terms_from_str(&self, input: &str) -> Vec<ExtratedTerm> {

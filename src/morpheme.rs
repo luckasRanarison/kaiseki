@@ -36,6 +36,14 @@ impl Morpheme {
         matches!(self.part_of_speech, PartOfSpeech::Verb)
     }
 
+    pub fn is_adjective(&self) -> bool {
+        matches!(self.part_of_speech, PartOfSpeech::Adjective)
+    }
+
+    pub fn is_symbol(&self) -> bool {
+        matches!(self.part_of_speech, PartOfSpeech::Symbol)
+    }
+
     pub fn is_inflection(&self) -> bool {
         self.is_ni_verb() || self.is_aux_verb() || self.is_te() || self.is_ba()
     }
@@ -45,7 +53,8 @@ impl Morpheme {
     }
 
     fn is_te(&self) -> bool {
-        self.text == "て" && self.has_sub_pos(&SubPartOfSpeech::ConjunctiveParticle)
+        matches!(self.text.as_str(), "て" | "で")
+            && self.has_sub_pos(&SubPartOfSpeech::ConjunctiveParticle)
     }
 
     fn is_ba(&self) -> bool {

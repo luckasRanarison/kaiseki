@@ -3,6 +3,7 @@ mod conjugation;
 mod dict;
 mod feature;
 mod fst;
+mod inflection;
 mod lattice;
 mod matrix;
 mod morpheme;
@@ -11,7 +12,6 @@ mod row;
 mod term;
 mod tokenizer;
 mod unk;
-mod verb;
 mod word;
 
 pub mod bincode;
