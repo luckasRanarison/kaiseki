@@ -33,23 +33,31 @@ impl Morpheme {
     }
 
     pub fn is_verb(&self) -> bool {
-        matches!(self.part_of_speech, PartOfSpeech::Verb)
+        self.part_of_speech == PartOfSpeech::Verb
     }
 
     pub fn is_adjective(&self) -> bool {
-        matches!(self.part_of_speech, PartOfSpeech::Adjective)
+        self.part_of_speech == PartOfSpeech::Adjective
     }
 
     pub fn is_symbol(&self) -> bool {
-        matches!(self.part_of_speech, PartOfSpeech::Symbol)
+        self.part_of_speech == PartOfSpeech::Symbol
     }
 
     pub fn is_inflection(&self) -> bool {
-        self.is_ni_verb() || self.is_aux_verb() || self.is_te() || self.is_ba()
+        self.is_ni_verb()
+            || self.is_aux_verb()
+            || self.is_sfx_verb()
+            || self.is_te()
+            || self.is_ba()
     }
 
     fn is_ni_verb(&self) -> bool {
         self.is_verb() && self.has_sub_pos(&SubPartOfSpeech::NonIndependent)
+    }
+
+    fn is_sfx_verb(&self) -> bool {
+        self.is_verb() && self.has_sub_pos(&SubPartOfSpeech::Suffix)
     }
 
     fn is_te(&self) -> bool {
@@ -62,6 +70,6 @@ impl Morpheme {
     }
 
     fn is_aux_verb(&self) -> bool {
-        matches!(self.part_of_speech, PartOfSpeech::AuxiliaryVerb)
+        self.part_of_speech == PartOfSpeech::AuxiliaryVerb
     }
 }

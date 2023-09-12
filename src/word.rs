@@ -17,20 +17,18 @@ impl Word {
             let start = main.start;
             let end = morphemes.last().map_or(main.end, |l| l.end);
             let text = morphemes.iter().map(|m| m.text.to_owned()).collect();
-            let base_form = match &main.base_form {
-                Some(value) => value,
-                _ => &main.text,
-            };
+            let base_form = main.base_form.as_ref().unwrap_or(&main.text).to_owned();
             let part_of_speech = main.part_of_speech;
             let inflections = Inflection::from_morphemes(morphemes);
+            let morphemes = morphemes.to_vec();
 
             Self {
                 text,
                 start,
                 end,
-                base_form: base_form.to_owned(),
+                base_form,
                 part_of_speech,
-                morphemes: morphemes.to_vec(),
+                morphemes,
                 inflections,
             }
         })

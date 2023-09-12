@@ -1,6 +1,6 @@
 use crate::{ConjugationForm, Morpheme};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Inflection {
     Polite,
     Negative,
@@ -20,6 +20,7 @@ pub enum Inflection {
     Tara,
     Ba,
     PotentialPassive,
+    Passive,
     Causative,
     Tai,
 }
@@ -55,6 +56,7 @@ impl Inflection {
                 Some("ちゃう") => Some(Self::Chau),
                 Some("う") => Some(Self::Volotional),
                 Some("ば") => Some(Self::Ba),
+                Some("れる") => Some(Self::Passive),
                 Some("させる") => Some(Self::Causative),
                 Some("られる") => Some(Self::PotentialPassive),
                 Some("たい") => Some(Self::Tai),
@@ -97,7 +99,6 @@ mod tests {
     #[test]
     fn test_base_form() {
         let tokenizer = Tokenizer::new().unwrap();
-
         let morphemes = tokenizer.tokenize("食べる");
         let inflections = Inflection::from_morphemes(&morphemes);
         assert!(inflections.is_empty());
@@ -128,6 +129,7 @@ mod tests {
             ("食べられる", PotentialPassive),
             ("食べさせる", Causative),
             ("食べたい", Tai),
+            ("飲まれる", Passive),
         ];
 
         for (input, expected) in test_cases {
