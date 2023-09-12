@@ -94,8 +94,8 @@ impl Tokenizer {
             if has_inflections {
                 while let Some(next) = morphemes.peek() {
                     if next.is_inflection() {
-                        word_morphemes.push(next.to_owned());
-                        morphemes.next();
+                        let next = morphemes.next().unwrap();
+                        word_morphemes.push(next);
                     } else {
                         break;
                     }
@@ -162,6 +162,10 @@ impl Tokenizer {
 
 pub fn tokenize(input: &str) -> Result<Vec<Morpheme>, Error> {
     Ok(Tokenizer::new()?.tokenize(input))
+}
+
+pub fn tokenize_word(input: &str) -> Result<Vec<Word>, Error> {
+    Ok(Tokenizer::new()?.tokenize_word(input))
 }
 
 #[cfg(test)]

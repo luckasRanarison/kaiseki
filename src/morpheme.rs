@@ -80,6 +80,26 @@ impl Morpheme {
         self.part_of_speech == PartOfSpeech::Conjunction
     }
 
+    pub fn is_pronoun(&self) -> bool {
+        self.has_sub_pos(&SubPartOfSpeech::Pronoun)
+    }
+
+    pub fn is_adjectivial_noun(&self) -> bool {
+        self.has_sub_pos(&SubPartOfSpeech::AdjectivalNounStem)
+    }
+
+    pub fn is_expression(&self) -> bool {
+        self.has_sub_pos(&SubPartOfSpeech::Phrase)
+    }
+
+    pub fn is_counter(&self) -> bool {
+        self.has_sub_pos(&SubPartOfSpeech::Counter)
+    }
+
+    pub fn is_suffix(&self) -> bool {
+        self.has_sub_pos(&SubPartOfSpeech::Suffix)
+    }
+
     pub fn is_inflection(&self) -> bool {
         self.is_ni_verb()
             || self.is_auxiliary_verb()
