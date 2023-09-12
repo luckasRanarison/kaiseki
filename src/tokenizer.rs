@@ -88,7 +88,7 @@ impl Tokenizer {
                 continue;
             }
 
-            let has_inflections = morpheme.is_verb() || morpheme.is_adjective();
+            let has_inflections = morpheme.has_inflection();
             let mut word_morphemes = vec![morpheme];
 
             if has_inflections {
