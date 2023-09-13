@@ -1,7 +1,7 @@
 use bincode::{Decode, Encode};
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq, Encode, Decode)]
+#[derive(Debug, Clone, Copy, PartialEq, Encode, Decode)]
 pub enum ConjugationType {
     BungoKeri,
     IchidanEru,
@@ -21,7 +21,6 @@ pub enum ConjugationType {
     GodanSaRow,
     GodanRaRowSpecial,
     BungoKi,
-    Placeholder,
     GodanTaRow,
     KakanKuru,
     SpecialMasu,
@@ -85,7 +84,6 @@ impl From<&str> for ConjugationType {
             "五段・サ行" => Self::GodanSaRow,
             "五段・ラ行特殊" => Self::GodanRaRowSpecial,
             "文語・キ" => Self::BungoKi,
-            "*" => Self::Placeholder,
             "五段・タ行" => Self::GodanTaRow,
             "カ変・クル" => Self::KakanKuru,
             "特殊・マス" => Self::SpecialMasu,
@@ -151,7 +149,6 @@ impl fmt::Display for ConjugationType {
             Self::GodanSaRow => "五段・サ行",
             Self::GodanRaRowSpecial => "五段・ラ行特殊",
             Self::BungoKi => "文語・キ",
-            Self::Placeholder => "*",
             Self::GodanTaRow => "五段・タ行",
             Self::KakanKuru => "カ変・クル",
             Self::SpecialMasu => "特殊・マス",
@@ -194,7 +191,7 @@ impl fmt::Display for ConjugationType {
             Self::Unknown => "未知",
         };
 
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 
@@ -298,6 +295,6 @@ impl fmt::Display for ConjugationForm {
             Self::Unknown => "未知",
         };
 
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
