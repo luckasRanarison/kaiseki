@@ -5,15 +5,12 @@ use bincode::{
     error::DecodeError,
     Decode, Encode,
 };
-use lazy_static::lazy_static;
 use std::io;
 
-lazy_static! {
-    static ref BINCODE_CONFIG: Configuration = config::standard();
-}
+static BINCODE_CONFIG: Configuration = config::standard();
 
 pub fn decode_slice<D: Decode>(bytes: &[u8]) -> Result<D, Error> {
-    let (decoded, written) = decode_from_slice(bytes, *BINCODE_CONFIG)?;
+    let (decoded, written) = decode_from_slice(bytes, BINCODE_CONFIG)?;
     let additional = bytes.len() - written;
 
     if additional != 0 {
@@ -24,7 +21,7 @@ pub fn decode_slice<D: Decode>(bytes: &[u8]) -> Result<D, Error> {
 }
 
 pub fn encode<E: Encode, W: io::Write>(value: E, writer: &mut W) -> Result<(), Error> {
-    encode_into_std_write(value, writer, *BINCODE_CONFIG)?;
+    encode_into_std_write(value, writer, BINCODE_CONFIG)?;
 
     Ok(())
 }
