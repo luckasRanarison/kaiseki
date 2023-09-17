@@ -4,17 +4,22 @@ kaiseki (解析) is a japanese tokenizer and morphological analyzer using [mecab
 
 ## Usage
 
-kaiseki currently only supports morpheme tokenization and provides additional informations such as **part of speech**, **conjugation form** and **reading**.
+kaiseki supports both morpheme tokenization and word tokenization (inflections included). It also provides additional informations from the mecab dictionary such as part of speech, conjugation form,...
 
 ```rust
 use kaiseki::{Tokenizer, error:Error};
 
 fn main() -> Result<(), Error> {
     let tokenizer = Tokenizer::new()?;
-    let tokens = tokenizer.tokenize("東京都に住む");
-    let morphemes: Vec<_> = tokens.iter().map(|token| &token.text).collect();
+    let morphemes = tokenizer.tokenize("東京都に住んでいる");
+    let morphemes: Vec<_> = morphemes.iter().map(|m| &m.text).collect();
 
-    println!("{:?}", morphemes); // ["東京", "都", "に", "住む"]
+    println!("{:?}", morphemes); // ["東京", "都", "に", "住ん", "で", "いる"]
+
+    let words = tokenizer.tokenize_word("東京都に住んでいる"); 
+    let words: Vec<_> = words.iter().map(|w| &w.text).collect();
+
+    println!("{:?}", words); // ["東京", "都", "に", "住んでいる"]
 
     Ok(())
 }
