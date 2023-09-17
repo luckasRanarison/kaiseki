@@ -100,12 +100,20 @@ impl Morpheme {
         self.has_sub_pos(&SubPartOfSpeech::Suffix)
     }
 
+    pub fn is_da_variant(&self) -> bool {
+        matches!(
+            self.conjugation_type,
+            Some(ConjugationType::SpecialDa) | Some(ConjugationType::SpecialDesu)
+        )
+    }
+
     pub fn is_inflection(&self) -> bool {
-        self.is_ni_verb()
+        (self.is_ni_verb()
             || self.is_auxiliary_verb()
             || self.is_sfx_verb()
             || self.is_te()
-            || self.is_ba()
+            || self.is_ba())
+            && !self.is_da_variant()
     }
 
     pub fn has_inflection(&self) -> bool {
