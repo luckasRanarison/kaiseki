@@ -1,7 +1,7 @@
 use bincode::{Decode, Encode};
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq, Encode, Decode)]
+#[derive(Debug, Clone, Copy, PartialEq, Encode, Decode)]
 pub enum PartOfSpeech {
     Noun,
     Verb,
@@ -62,11 +62,11 @@ impl fmt::Display for PartOfSpeech {
             Self::Other => "その他",
         };
 
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Encode, Decode)]
+#[derive(Debug, Clone, Copy, PartialEq, Encode, Decode)]
 pub enum SubPartOfSpeech {
     General,
     ProperNoun,
@@ -226,6 +226,6 @@ impl fmt::Display for SubPartOfSpeech {
             Self::Other => "その他",
         };
 
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }

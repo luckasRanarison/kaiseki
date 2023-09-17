@@ -8,6 +8,7 @@ use crate::{
     morpheme::Morpheme,
     term::ExtratedTerm,
     unk::UnknownDictionary,
+    word::Word,
 };
 
 pub struct Tokenizer {
@@ -78,6 +79,39 @@ impl Tokenizer {
         tokens
     }
 
+    pub fn tokenize_word(&self, input: &str) -> Vec<Word> {
+        let mut words = Vec::new();
+        let mut morphemes = self.tokenize(input).into_iter().peekable();
+
+        while let Some(morpheme) = morphemes.next() {
+            if morpheme.is_symbol() {
+                continue;
+            }
+
+            let has_inflections = morpheme.has_inflection();
+            let mut word_morphemes = vec![morpheme];
+
+            if has_inflections {
+                while let Some(next) = morphemes.peek() {
+                    if next.is_inflection() {
+                        let next = morphemes.next().unwrap();
+                        word_morphemes.push(next);
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            let word = Word::from_morphemes(word_morphemes.as_slice());
+
+            if let Some(word) = word {
+                words.push(word);
+            }
+        }
+
+        words
+    }
+
     fn get_terms_from_str(&self, input: &str) -> Vec<ExtratedTerm> {
         let terms = self.fst.get_from_prefix(input);
         let mut extracted = Vec::new();
@@ -93,7 +127,7 @@ impl Tokenizer {
 
     fn get_unkown_terms_from_str(&self, input: &str, found: bool) -> Vec<ExtratedTerm> {
         let mut unk_terms = Vec::new();
-        let mut chars = input.chars().peekable();
+        let mut chars = input.chars();
         let mut current_len = 0;
         let ch = chars.next().unwrap();
         let char_categories = self.char_table.lookup(ch);
@@ -130,16 +164,19 @@ pub fn tokenize(input: &str) -> Result<Vec<Morpheme>, Error> {
     Ok(Tokenizer::new()?.tokenize(input))
 }
 
+pub fn tokenize_word(input: &str) -> Result<Vec<Word>, Error> {
+    Ok(Tokenizer::new()?.tokenize_word(input))
+}
+
 #[cfg(test)]
 mod tests {
-    use super::Tokenizer;
     use crate::conjugation::ConjugationForm as C;
     use crate::pos::{PartOfSpeech as P, SubPartOfSpeech as S};
+    use crate::{tokenize, tokenize_word};
 
     #[test]
     fn test_tokenizer() {
-        let tokenizer = Tokenizer::new().unwrap();
-        let morphemes = tokenizer.tokenize("東京都に住む");
+        let morphemes = tokenize("東京都に住む").unwrap();
         let expected = vec!["東京", "都", "に", "住む"];
         let text: Vec<_> = morphemes.iter().map(|token| &token.text).collect();
 
@@ -148,8 +185,7 @@ mod tests {
 
     #[test]
     fn test_tokenizer_unkown() {
-        let tokenizer = Tokenizer::new().unwrap();
-        let morphemes = tokenizer.tokenize("1234個");
+        let morphemes = tokenize("1234個").unwrap();
         let expected = vec!["1234", "個"];
         let text: Vec<_> = morphemes.iter().map(|token| &token.text).collect();
 
@@ -158,8 +194,7 @@ mod tests {
 
     #[test]
     fn test_token_feature() {
-        let tokenizer = Tokenizer::new().unwrap();
-        let morphemes = tokenizer.tokenize("ケーキを食べる");
+        let morphemes = tokenize("ケーキを食べる").unwrap();
 
         assert_eq!(morphemes[0].part_of_speech, P::Noun);
         assert_eq!(Some("ケーキ".to_owned()), morphemes[0].reading);
@@ -174,10 +209,18 @@ mod tests {
 
     #[test]
     fn test_token_feature_unknown() {
-        let tokenizer = Tokenizer::new().unwrap();
-        let morphemes = tokenizer.tokenize("100 ");
+        let morphemes = tokenize("100 ").unwrap();
 
         assert!(morphemes[0].sub_part_of_speech.contains(&S::Number));
         assert!(morphemes[1].sub_part_of_speech.contains(&S::Space));
+    }
+
+    #[test]
+    fn test_tokenize_word() {
+        let tokens = tokenize_word("昨日、彼に会った。すごく嬉しかったよ。").unwrap();
+        let expected = vec!["昨日", "彼", "に", "会った", "すごく", "嬉しかった", "よ"];
+        let text: Vec<_> = tokens.into_iter().map(|token| token.text).collect();
+
+        assert_eq!(expected, text);
     }
 }
