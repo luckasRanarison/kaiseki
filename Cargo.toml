@@ -1,20 +1,31 @@
-[package]
-name = "kaiseki"
-version = "0.1.0"
-edition = "2021"
-description = "A japanese tokenizer and morphological analyzer"
-authors = ["LIOKA Ranraison Fiderana <luckasranarison@gmail.com>"]
-repository = "https://github.com/luckasRanarison/kaiseki"
-keywords = ["tokenizer", "japanese", "nlp"]
-categories = ["text-processing"]
-license = "MIT"
-readme = "README.md"
+[workspace]
+resolver = "2"
+members = [ "crates/kaiseki", "crates/mecab-processor", "crates/mecab-types"]
 
-[dependencies]
-bincode = { version = "2.0.0-rc.3", features = ["serde"] }
-encoding_rs = "0.8.33"
+[workspace.dependencies]
+mecab-types = { path = "crates/mecab-types" }
+
+bincode = "2.0.0-rc.3"
+clap = { version = "4.5.26", features = ["derive"] }
 fst = "0.4.7"
 
-[[bin]]
-name = "kaiseki-build"
-path = "src/bin/build.rs"
+# [package]
+# name = "kaiseki"
+# version = "0.1.0"
+# edition = "2021"
+# description = "A japanese tokenizer and morphological analyzer"
+# authors = ["LIOKA Ranraison Fiderana <luckasranarison@gmail.com>"]
+# repository = "https://github.com/luckasRanarison/kaiseki"
+# keywords = ["tokenizer", "japanese", "nlp"]
+# categories = ["text-processing"]
+# license = "MIT"
+# readme = "README.md"
+#
+# [dependencies]
+# bincode = { version = "2.0.0-rc.3", features = ["serde"] }
+# encoding_rs = "0.8.33"
+# fst = "0.4.7"
+#
+# [[bin]]
+# name = "kaiseki-build"
+# path = "src/bin/build.rs"

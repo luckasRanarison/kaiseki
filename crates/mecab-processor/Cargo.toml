@@ -1,0 +1,12 @@
+[package]
+name = "mecab-processor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap.workspace = true
+mecab-types.workspace = true
+bincode.workspace = true
+fst.workspace = true
+
+encoding_rs = "0.8.33"

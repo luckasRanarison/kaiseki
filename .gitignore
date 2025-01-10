@@ -1,3 +1,4 @@
 target
 mecab/**
 !mecab/.keep
+mecab-ipadic.tar.gz

@@ -1,0 +1,8 @@
+[package]
+name = "mecab-types"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bincode = { workspace = true, features = ["serde"] }
+strum = { version = "0.26.3", features = ["derive"] }

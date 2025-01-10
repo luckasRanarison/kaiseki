@@ -1,0 +1,11 @@
+[package]
+name = "kaiseki"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bincode.workspace = true
+mecab-types.workspace = true
+fst.workspace = true
+
+thiserror = "2.0.11"
