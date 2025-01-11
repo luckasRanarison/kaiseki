@@ -1,11 +1,6 @@
-use std::collections::BTreeMap;
-
-use mecab_types::{char::CharCategory, features::Feature, term::Term};
+use mecab_types::char::CharCategory;
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
-pub type TermMap = BTreeMap<String, Vec<Term>>;
-pub type FeatMap = BTreeMap<String, Vec<Feature>>;
 
 pub fn parse_char_map(line: &str) -> Result<(u16, u16, Vec<&str>)> {
     let fields: Vec<_> = line.split_whitespace().collect();

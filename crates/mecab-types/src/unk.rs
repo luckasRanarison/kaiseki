@@ -3,11 +3,11 @@ use crate::{
     term::{Term, TermId},
 };
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use bincode::{Decode, Encode};
 
-type TermMap = HashMap<String, Vec<(TermId, Term)>>;
+type TermMap = BTreeMap<String, Vec<(TermId, Term)>>;
 
 #[derive(Encode, Decode)]
 pub struct UnknownDictionary {

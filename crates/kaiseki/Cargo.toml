@@ -2,6 +2,10 @@
 name = "kaiseki"
 version = "0.1.0"
 edition = "2021"
+description = "A Japanese tokenizer and morphological analyzer"
+license = "MIT"
+repository = "https//github.com/luckasRanarison/kaiseki"
+authors = ["LIOKA Ranarison Fiderana <luckasranarison@gmail.com>"]
 
 [dependencies]
 bincode.workspace = true

@@ -1,14 +1,12 @@
-use std::collections::HashMap;
-
 use bincode::{Decode, Encode};
 
 #[derive(Encode, Decode)]
 pub struct CharTable {
-    map: HashMap<u16, Vec<CharCategory>>,
+    map: Vec<Vec<CharCategory>>,
 }
 
 impl CharTable {
-    pub fn new(map: HashMap<u16, Vec<CharCategory>>) -> Self {
+    pub fn new(map: Vec<Vec<CharCategory>>) -> Self {
         Self { map }
     }
 
@@ -16,8 +14,8 @@ impl CharTable {
         let index = character as usize;
 
         match index {
-            0..=0xFFFF => &self.map[&(index as u16)],
-            _ => &self.map[&0xFFFF],
+            0..=0xFFFF => &self.map[index],
+            _ => &self.map[0xFFFF],
         }
     }
 }

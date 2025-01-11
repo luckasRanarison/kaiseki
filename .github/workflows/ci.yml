@@ -16,8 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Download mecab-ipadic
+        run: bash ipadic-download.sh
+
       - name: Build
         run: cargo build --verbose
+
+      - name: Generate binaries
+        run: cargo run --bin mecab-processor -- --input-dir mecab --out-dir data
 
       - name: Test
         run: cargo test --workspace --lib --verbose
